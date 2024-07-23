@@ -217,3 +217,4 @@ barplot(mpa_zonal_df_2$mean,
         xlim= c(0,1000000)
 )
 dev.off()
+
