@@ -149,7 +149,7 @@ plot(richness_indiv_taxa_zonal_max_df$ship_density, richness_indiv_taxa_zonal_ma
 plot(richness_indiv_taxa_zonal_max_df$ship_density, richness_indiv_taxa_zonal_max_df$ForamCK, xlab = "Maximum Ship Density", ylab = "Foraminifera Species Richnness")
 
 ################################################################################
-#                            Create the plots
+#                            Marine Reamls
 ################################################################################
 
 # Create a color palette with interpolation
@@ -190,6 +190,12 @@ barplot(marine_realms_df_2$mean,
         )
 dev.off()
 
+
+################################################################################
+#                            Marine Protected Areas
+################################################################################
+
+#Mean
 mpa_zonal <- terra::zonal(all_summed, mpa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
 mpa_zonal_sd <- terra::zonal(all_summed, mpa, fun=sd, as.polygons=TRUE, na.rm=TRUE) 
 mpa_zonal_df_mean <- as.data.frame(mpa_zonal)
@@ -215,6 +221,72 @@ barplot(mpa_zonal_df_2$mean,
         las = 2,
         horiz = TRUE,
         xlim= c(0,1000000)
+)
+dev.off()
+
+#Mean - Top 10
+mpa_zonal_df_2_top10 <- mpa_zonal_df[order(mpa_zonal_df$mean, decreasing = TRUE),]
+head(mpa_zonal_df_2_top10)
+mpa_zonal_df_2_top10 <- mpa_zonal_df_2_top10[1:10,]
+#
+png(file="mpa_vs_shipping_top10.png",width=5000, height=2500, res=300)
+par(mar=c(5,20,5,5))
+barplot(mpa_zonal_df_2_top10$mean,
+        names.arg = paste0(mpa_zonal_df_2_top10$Name, " (", mpa_zonal_df_2_top10$cntryCd, ")"),
+        #data=marine_realms_df_2, 
+        main="Shipping Density vs MPA (top 10)",
+        xlab=NA, 
+        ylab=NA, 
+        las = 2,
+        horiz = TRUE,
+        xlim= c(0,1000000)
+)
+dev.off()
+
+
+#Max
+mpa_zonal_max <- terra::zonal(all_summed, mpa, fun=max, as.polygons=TRUE, na.rm=TRUE) 
+mpa_zonal_max_df <- as.data.frame(mpa_zonal_max)
+
+names(mpa_zonal_max_df)[10] <- "max"
+#Save & Load
+#save(mpa_zonal_max_df, file = "mpa_zonal_max_df.RData")
+#load("mpa_zonal_max_df.RData")
+#terra::writeVector(mpa_zonal_max, "mpa_zonal_max.shp", overwrite=TRUE)
+#terra::plot(mpa_zonal_max, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
+#View(mpa_zonal_max_df)
+#Boxplot
+mpa_zonal_max_df_2 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
+png(file="mpa_max_vs_shipping.png",width=8000, height=8000, res=300)
+par(mar=c(5,20,5,5))
+barplot(mpa_zonal_max_df_2$max,
+        names.arg = mpa_zonal_max_df_2$Name,
+        #data=marine_realms_df_2, 
+        main="Maximum Shipping Density vs MPA",
+        xlab=NA, 
+        ylab=NA,
+        las = 2,
+        horiz = TRUE,
+        xlim= c(0,10000000)
+)
+dev.off()
+
+#Max - Top 10
+mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
+head(mpa_zonal_max_df_2_top10)
+mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df_2_top10[1:10,]
+#
+png(file="mpa_vs_max_shipping_top10.png",width=5000, height=2500, res=300)
+par(mar=c(5,20,5,5))
+barplot(mpa_zonal_max_df_2_top10$max,
+        names.arg = paste0(mpa_zonal_max_df_2_top10$Name, " (", mpa_zonal_max_df_2_top10$cntryCd, ")"),
+        #data=marine_realms_df_2, 
+        main="Shipping Density vs MPA (top 10)",
+        xlab=NA, 
+        ylab=NA, 
+        las = 2,
+        horiz = TRUE,
+        xlim= c(0,10000000)
 )
 dev.off()
 
