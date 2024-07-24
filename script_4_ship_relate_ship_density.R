@@ -294,19 +294,14 @@ dev.off()
 #                              Non-MPA vs MPA
 ################################################################################
 
-rectangle <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo.shp")
-rectangle_2 <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo_2.shp")
-rectangle_3 <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo_3.shp")
-
-#terra::plot(rectangle)
-#terra::plot(rectangle_2)
-#terra::plot(rectangle_3)
-
 #Upload shapefiles
 mpa_corrected <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/mpa_assis.shp")
 non_mpa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/diferenca_rectangulo_mpa.shp")
-#non_mpa <- erase(rectangle_3, mpa_corrected)
-#terra::plot(non_mpa)
+all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
+
+#terra::plot(mpa_corrected)
+#terra::plot(rectangle_3)
+
 
 
 
@@ -319,9 +314,11 @@ non_mpa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/diferenc
 
 #Upload shapefiles
 ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
-non_ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/xxxxxx.shp")
+non_ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/non_ebsa.shp")
+all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
 
-
+#terra::plot(ebsa)
+#terra::plot(non_ebsa)
 
 
 
