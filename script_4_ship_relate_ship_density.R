@@ -149,7 +149,7 @@ plot(richness_indiv_taxa_zonal_max_df$ship_density, richness_indiv_taxa_zonal_ma
 plot(richness_indiv_taxa_zonal_max_df$ship_density, richness_indiv_taxa_zonal_max_df$ForamCK, xlab = "Maximum Ship Density", ylab = "Foraminifera Species Richnness")
 
 ################################################################################
-#                            Marine Reamls
+#                            Marine Realms
 ################################################################################
 
 # Create a color palette with interpolation
@@ -289,4 +289,40 @@ barplot(mpa_zonal_max_df_2_top10$max,
         xlim= c(0,10000000)
 )
 dev.off()
+
+################################################################################
+#                              Non-MPA vs MPA
+################################################################################
+
+rectangle <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo.shp")
+rectangle_2 <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo_2.shp")
+rectangle_3 <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/rectangulo_3.shp")
+
+#terra::plot(rectangle)
+#terra::plot(rectangle_2)
+#terra::plot(rectangle_3)
+
+#Upload shapefiles
+mpa_corrected <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/mpa_assis.shp")
+non_mpa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/diferenca_rectangulo_mpa.shp")
+#non_mpa <- erase(rectangle_3, mpa_corrected)
+#terra::plot(non_mpa)
+
+
+
+
+################################################################################
+#                              Non-EBSA vs EBSA
+################################################################################
+
+# ECOLOGICALLY OR BIOLOGICALLY SIGNIFICANT MARINE AREAS (EBSA)
+
+#Upload shapefiles
+ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
+non_ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/xxxxxx.shp")
+
+
+
+
+
 
