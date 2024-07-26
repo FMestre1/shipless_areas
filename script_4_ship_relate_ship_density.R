@@ -300,11 +300,34 @@ non_mpa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/diferenc
 all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
 
 #terra::plot(mpa_corrected)
-#terra::plot(rectangle_3)
+#terra::plot(non_mpa)
 
+#mpa_corrected_zonal <- terra::zonal(all_summed, mpa_corrected, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
+#non_mpa_zonal <- terra::zonal(all_summed, non_mpa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
+#
+mpa_corrected_extract <- terra::extract(all_summed, mpa_corrected) 
+mpa_corrected_extract_values <- mpa_corrected_extract$grid_float_All_2011_01_converted
+mpa_corrected_extract_values_noNA <- mpa_corrected_extract_values[!is.na(mpa_corrected_extract_values)]
+#save(mpa_corrected_extract_values_noNA, file = "mpa_corrected_extract_values_noNA.RData")
+#
+non_mpa_extract <- terra::extract(all_summed, non_mpa) 
+non_mpa_extract_values <- non_mpa_extract$grid_float_All_2011_01_converted
+non_mpa_extract_values_noNA <- non_mpa_extract_values[!is.na(non_mpa_extract_values)]
+#save(non_mpa_extract_values_noNA, file = "non_mpa_extract_values_noNA.RData")
+#
+mpa_df <- data.frame(mpa_corrected_extract_values_noNA, rep("mpa", length(mpa_corrected_extract_values_noNA)))
+names(mpa_df) <- c("ship_density", "inside_outside_mpa")
+non_mpa_df <- data.frame(non_mpa_extract_values_noNA, rep("non-mpa", length(non_mpa_extract_values_noNA)))
+names(non_mpa_df) <- c("ship_density", "inside_outside_mpa")
+mpa_final_df <- rbind(mpa_df, non_mpa_df)
+mpa_final_df$inside_outside_mpa <- as.factor(mpa_final_df$inside_outside_mpa) 
+#save(mpa_final_df, file = "mpa_final_df.RData")
 
-
-
+#Create the boxplot
+#load("/media/jorgeassis/FMestre/shipless_areas/mpa_final_df.RData")
+png(file="mpa_non_mpa_boxplot.png", width=1500, height=1500, res=300)
+boxplot(mpa_final_df$inside_outside_mpa, mpa_final_df$ship_density)
+dev.off()
 
 ################################################################################
 #                              Non-EBSA vs EBSA
@@ -319,6 +342,35 @@ all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_
 
 #terra::plot(ebsa)
 #terra::plot(non_ebsa)
+
+#ebsa_zonal <- terra::zonal(all_summed, ebsa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
+#non_ebsa_zonal <- terra::zonal(all_summed, non_ebsa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
+#
+ebsa_extract <- terra::extract(all_summed, ebsa)
+ebsa_extract_values <- ebsa_extract$grid_float_All_2011_01_converted
+ebsa_extract_values_noNA <- ebsa_extract_values[!is.na(ebsa_extract_values)]
+#save(ebsa_extract_values_noNA, file = "ebsa_extract_values_noNA.RData")
+#
+non_ebsa_extract <- terra::extract(all_summed, non_ebsa) 
+non_ebsa_extract_values <- non_ebsa_extract$grid_float_All_2011_01_converted
+non_ebsa_extract_values_noNA <- non_ebsa_extract_values[!is.na(non_ebsa_extract_values)]
+#save(non_ebsa_extract_values_noNA, file = "non_ebsa_extract_values_noNA.RData")
+#
+ebsa_df <- data.frame(ebsa_extract_values_noNA, rep("ebsa", length(ebsa_extract_values_noNA)))
+names(ebsa_df) <- c("ship_density", "inside_outside_ebsa")
+non_ebsa_df <- data.frame(non_ebsa_extract_values_noNA, rep("non-ebsa", length(non_ebsa_extract_values_noNA)))
+names(non_ebsa_df) <- c("ship_density", "inside_outside_ebsa")
+ebsa_final_df <- rbind(ebsa_df, non_ebsa_df)
+ebsa_final_df$inside_outside_ebsa <- as.factor(ebsa_final_df$inside_outside_ebsa) 
+#save(ebsa_final_df, file = "ebsa_final_df.RData")
+
+#Create the boxplot
+#load("/media/jorgeassis/FMestre/shipless_areas/ebsa_final_df.RData")
+png(file="ebsa_non_ebsa_boxplot.png",width=1500, height=1500, res=300)
+boxplot(ebsa_final_df$inside_outside_ebsa, ebsa_final_df$ship_density)
+dev.off()
+
+
 
 
 
