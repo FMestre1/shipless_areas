@@ -7,6 +7,7 @@
 
 #Load package
 library(terra)
+library(beanplot)
 
 ################################################################################
 #                                 Load data
@@ -309,11 +310,13 @@ mpa_corrected_extract <- terra::extract(all_summed, mpa_corrected)
 mpa_corrected_extract_values <- mpa_corrected_extract$grid_float_All_2011_01_converted
 mpa_corrected_extract_values_noNA <- mpa_corrected_extract_values[!is.na(mpa_corrected_extract_values)]
 #save(mpa_corrected_extract_values_noNA, file = "mpa_corrected_extract_values_noNA.RData")
+#load("mpa_corrected_extract_values_noNA.RData")
 #
 non_mpa_extract <- terra::extract(all_summed, non_mpa) 
 non_mpa_extract_values <- non_mpa_extract$grid_float_All_2011_01_converted
 non_mpa_extract_values_noNA <- non_mpa_extract_values[!is.na(non_mpa_extract_values)]
 #save(non_mpa_extract_values_noNA, file = "non_mpa_extract_values_noNA.RData")
+#load("non_mpa_extract_values_noNA.RData")
 #
 mpa_df <- data.frame(mpa_corrected_extract_values_noNA, rep("mpa", length(mpa_corrected_extract_values_noNA)))
 names(mpa_df) <- c("ship_density", "inside_outside_mpa")
@@ -322,11 +325,36 @@ names(non_mpa_df) <- c("ship_density", "inside_outside_mpa")
 mpa_final_df <- rbind(mpa_df, non_mpa_df)
 mpa_final_df$inside_outside_mpa <- as.factor(mpa_final_df$inside_outside_mpa) 
 #save(mpa_final_df, file = "mpa_final_df.RData")
+#load("mpa_final_df.RData")
 
 #Create the boxplot
+mpa_final_df_log_transf <- mpa_final_df
+mpa_final_df_log_transf$ship_density <- log(mpa_final_df_log_transf$ship_density)+1
 #load("/media/jorgeassis/FMestre/shipless_areas/mpa_final_df.RData")
-png(file="mpa_non_mpa_boxplot.png", width=1500, height=1500, res=300)
-boxplot(mpa_final_df$inside_outside_mpa, mpa_final_df$ship_density)
+png(file="mpa_non_mpa_boxplot_LOG.png", width=1500, height=4000, res=300)
+boxplot(mpa_final_df_log_transf$inside_outside_mpa, mpa_final_df_log_transf$ship_density)
+dev.off()
+
+#Violin plot
+# install.packages("vioplot")
+#png(file="mpa_non_mpa_plot.png",width=1500, height=2500, res=300)
+#vioplot(inside_outside_mpa ~ ship_density, 
+#        data = mpa_final_df,
+#        col = c("#556B2F", "#8B1A1A")
+#) 
+#dev.off()
+
+
+#Beanplot
+#mpa_df <- mpa_final_df[mpa_final_df$inside_outside_ebsa == "mpa", ]
+#non_mpa_df <- mpa_final_df[mpa_final_df$inside_outside_ebsa == "non-mpa", ]
+
+mpa_final_df_sampled <- mpa_final_df[sample(nrow(mpa_final_df), 5000), ]
+#table(mpa_final_df_sampled$inside_outside_mpa)
+
+png(file="mpa_non_mpa_beanplot.png",width=1500, height=1500, res=300)
+#beanplot::beanplot(sample(mpa_df$ship_density, 5000), sample(non_mpa_df$ship_density,5000))
+beanplot::beanplot(mpa_final_df_sampled$ship_density ~ mpa_final_df_sampled$inside_outside_mpa)
 dev.off()
 
 ################################################################################
@@ -350,11 +378,13 @@ ebsa_extract <- terra::extract(all_summed, ebsa)
 ebsa_extract_values <- ebsa_extract$grid_float_All_2011_01_converted
 ebsa_extract_values_noNA <- ebsa_extract_values[!is.na(ebsa_extract_values)]
 #save(ebsa_extract_values_noNA, file = "ebsa_extract_values_noNA.RData")
+#load("ebsa_extract_values_noNA.RData")
 #
 non_ebsa_extract <- terra::extract(all_summed, non_ebsa) 
 non_ebsa_extract_values <- non_ebsa_extract$grid_float_All_2011_01_converted
 non_ebsa_extract_values_noNA <- non_ebsa_extract_values[!is.na(non_ebsa_extract_values)]
 #save(non_ebsa_extract_values_noNA, file = "non_ebsa_extract_values_noNA.RData")
+#load("non_ebsa_extract_values_noNA.RData")
 #
 ebsa_df <- data.frame(ebsa_extract_values_noNA, rep("ebsa", length(ebsa_extract_values_noNA)))
 names(ebsa_df) <- c("ship_density", "inside_outside_ebsa")
@@ -363,15 +393,33 @@ names(non_ebsa_df) <- c("ship_density", "inside_outside_ebsa")
 ebsa_final_df <- rbind(ebsa_df, non_ebsa_df)
 ebsa_final_df$inside_outside_ebsa <- as.factor(ebsa_final_df$inside_outside_ebsa) 
 #save(ebsa_final_df, file = "ebsa_final_df.RData")
+#load("ebsa_final_df.RData")
 
 #Create the boxplot
+ebsa_final_df_log_transf <- ebsa_final_df
+ebsa_final_df_log_transf$ship_density <- log(ebsa_final_df_log_transf$ship_density)+1
 #load("/media/jorgeassis/FMestre/shipless_areas/ebsa_final_df.RData")
-png(file="ebsa_non_ebsa_boxplot.png",width=1500, height=1500, res=300)
-boxplot(ebsa_final_df$inside_outside_ebsa, ebsa_final_df$ship_density)
+png(file="ebsa_non_ebsa_boxplot_LOG.png",width=1500, height=4000, res=300)
+boxplot(ebsa_final_df_log_transf$inside_outside_ebsa, ebsa_final_df_log_transf$ship_density)
 dev.off()
 
+#Violin plot
+#png(file="ebsa_non_ebsa_violin_plot.png",width=1500, height=2500, res=300)
+#vioplot(inside_outside_ebsa ~ ship_density, 
+#        data = ebsa_final_df,
+#        col = c("#556B2F", "#8B1A1A")
+#        ) 
+#dev.off()
 
+#Beanplot
+#ebsa_df <- ebsa_final_df[ebsa_final_df$inside_outside_ebsa == "ebsa", ]
+#non_ebsa_df <- ebsa_final_df[ebsa_final_df$inside_outside_ebsa == "non-ebsa", ]
 
+ebsa_final_df_sampled <- ebsa_final_df[sample(nrow(ebsa_final_df), 5000), ]
+#table(ebsa_final_df_sampled$inside_outside_ebsa)
 
-
+png(file="ebsa_non_ebsa_beanplot_v3.png",width=1500, height=1500, res=300)
+#beanplot::beanplot(sample(ebsa_df$ship_density, 5000), sample(non_ebsa_df$ship_density,5000))
+beanplot::beanplot(ebsa_final_df_log_transf$ship_density ~ ebsa_final_df_log_transf$inside_outside_ebsa)
+dev.off()
 
