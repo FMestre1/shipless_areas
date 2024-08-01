@@ -5,22 +5,35 @@
 #VBastazini
 #01-08-2024
 
+#Load package
 library(MASS)
 
-y=rbind(mpa,mpa)
+#Load
+load("~/github/shipless_areas/mpa_corrected_extract_values_noNA.RData")
+load("~/github/shipless_areas/ebsa_extract_values_noNA.RData")
+load("~/github/shipless_areas/non_ebsa_extract_values_noNA.RData")
+load("~/github/shipless_areas/non_mpa_extract_values_noNA.RData")
+
+mpa <- mpa_corrected_extract_values_noNA
+nmpa <- non_mpa_extract_values_noNA
+ebsa <- ebsa_extract_values_noNA
+nebsa <- non_ebsa_extract_values_noNA
+
+rm(mpa_corrected_extract_values_noNA, non_mpa_extract_values_noNA,
+   ebsa_extract_values_noNA, non_ebsa_extract_values_noNA)
+
+y <- c(mpa,nmpa)
 level_1 <- rep(1, length(mpa))
 level_2 <- rep(2, length(nmpa))
 
-# Combinar  vetores
+# Combine  vectors
 combined_vector <- c(level_1, level_2)
 
 # Converter fator
 factor_vector <- factor(combined_vector, levels = c(1, 2))
-ymg = tapply(y,x,mean);ymg
+ymg <- tapply(y,factor_vector,mean);ymg
 # variância
-variancia =tapply(y,x,var);variancia
-
-
+variancia <- tapply(y,factor_vector,var);variancia
 
 # número de observações em cada sitio (np)
 #número total de observações (n) 
