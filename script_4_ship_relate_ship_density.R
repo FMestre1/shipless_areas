@@ -154,8 +154,8 @@ plot(richness_indiv_taxa_zonal_max_df$ship_density, richness_indiv_taxa_zonal_ma
 ################################################################################
 
 # Create a color palette with interpolation
-#palette_yr <- colorRampPalette(c("#ffff00", "#ff0000"))
-#palette_yr <- palette_yr(10)
+palette_yr <- colorRampPalette(c("#ffff00", "#ff0000"))
+palette_yr <- palette_yr(10)
 
 #?terra::zonal
 marine_realms_zonal <- terra::zonal(all_summed, marine_realms, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
@@ -288,6 +288,110 @@ barplot(mpa_zonal_max_df_2_top10$max,
         las = 2,
         horiz = TRUE,
         xlim= c(0,10000000)
+)
+dev.off()
+
+
+################################################################################
+#                                       EBSA
+################################################################################
+
+#Upload shapefiles
+ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
+non_ebsa <- terra::vect("/media/jorgeassis/FMestre/shipless_areas/shapes/non_ebsa.shp")
+all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
+
+#terra::plot(ebsa)
+#terra::plot(non_ebsa)
+
+#Mean
+ebsa_zonal <- terra::zonal(all_summed, ebsa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
+ebsa_zonal_sd <- terra::zonal(all_summed, ebsa, fun=sd, as.polygons=TRUE, na.rm=TRUE) 
+ebsa_zonal_df_mean <- as.data.frame(ebsa_zonal)
+ebsa_zonal_df_sd <- as.data.frame(ebsa_zonal_sd)
+ebsa_zonal_df <- cbind(ebsa_zonal_df_mean, ebsa_zonal_df_sd$grid_float_All_2011_01_converted)
+names(ebsa_zonal_df)[9:10] <- c("mean", "sd")
+head(ebsa_zonal_df)
+#Save & Load
+#save(ebsa_zonal_df, file = "ebsa_zonal_df.RData")
+#load("ebsa_zonal_df.RData")
+#terra::writeVector(ebsa_zonal, "ebsa_zonal.shp", overwrite=TRUE)
+#terra::plot(ebsa_zonal, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
+#View(ebsa_zonal_df)
+#Boxplot
+ebsa_zonal_df_2 <- ebsa_zonal_df[order(ebsa_zonal_df$mean,decreasing = TRUE),]
+png(file="ebsa_vs_shipping.png",width=4000, height=8000, res=300)
+par(mar=c(5,20,5,5))
+barplot(ebsa_zonal_df_2$mean,
+        names.arg = ebsa_zonal_df_2$NAME,
+        main="Shipping Density vs EBSA",
+        xlab=NA, 
+        ylab=NA, 
+        las = 2,
+        horiz = TRUE#,
+        #xlim= c(0,1000000)
+)
+dev.off()
+
+#Mean - Top 10
+ebsa_zonal_df_2_top10 <- ebsa_zonal_df[order(ebsa_zonal_df$mean, decreasing = TRUE),]
+head(ebsa_zonal_df_2_top10)
+ebsa_zonal_df_2_top10 <- ebsa_zonal_df_2_top10[1:10,]
+#
+png(file="ebsa_vs_shipping_top10.png",width=5000, height=2500, res=300)
+par(mar=c(5,20,5,5))
+barplot(ebsa_zonal_df_2_top10$mean,
+        names.arg = ebsa_zonal_df_2_top10$NAME,
+        main="Shipping Density vs EBSA (top 10)",
+        xlab=NA, 
+        ylab=NA, 
+        las = 2,
+        horiz = TRUE#,
+        #xlim= c(0,1000000)
+)
+dev.off()
+
+
+#Max
+ebsa_zonal_max <- terra::zonal(all_summed, ebsa, fun=max, as.polygons=TRUE, na.rm=TRUE) 
+ebsa_zonal_max_df <- as.data.frame(ebsa_zonal_max)
+names(ebsa_zonal_max_df)[9] <- "max"
+#Save & Load
+#save(ebsa_zonal_max_df, file = "ebsa_zonal_max_df.RData")
+#load("ebsa_zonal_max_df.RData")
+#terra::writeVector(ebsa_zonal_max, "ebsa_zonal_max.shp", overwrite=TRUE)
+#terra::plot(ebsa_zonal_max, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
+#View(ebsa_zonal_max_df)
+#Boxplot
+ebsa_zonal_max_df_2 <- ebsa_zonal_max_df[order(ebsa_zonal_max_df$max, decreasing = TRUE),]
+png(file="ebsa_max_vs_shipping.png",width=8000, height=8000, res=300)
+par(mar=c(5,20,5,5))
+barplot(ebsa_zonal_max_df_2$max,
+        names.arg = ebsa_zonal_max_df_2$NAME,
+        main="Maximum Shipping Density vs EBSA",
+        xlab=NA, 
+        ylab=NA,
+        las = 2,
+        horiz = TRUE#,
+        #xlim= c(0,10000000)
+)
+dev.off()
+
+#Max - Top 10
+ebsa_zonal_max_df_2_top10 <- ebsa_zonal_max_df[order(ebsa_zonal_max_df$max, decreasing = TRUE),]
+head(ebsa_zonal_max_df_2_top10)
+ebsa_zonal_max_df_2_top10 <- ebsa_zonal_max_df_2_top10[1:10,]
+#
+png(file="ebsa_vs_max_shipping_top10.png",width=5000, height=2500, res=300)
+par(mar=c(5,20,5,5))
+barplot(ebsa_zonal_max_df_2_top10$max,
+        names.arg = ebsa_zonal_max_df_2_top10$NAME,
+        main="Shipping Density vs EBSA (top 10)",
+        xlab=NA, 
+        ylab=NA, 
+        las = 2,
+        horiz = TRUE#,
+        #xlim= c(0,10000000)
 )
 dev.off()
 
