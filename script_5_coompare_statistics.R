@@ -19,6 +19,11 @@ nmpa <- non_mpa_extract_values_noNA
 ebsa <- ebsa_extract_values_noNA
 nebsa <- non_ebsa_extract_values_noNA
 
+summary(mpa)
+summary(nmpa)
+summary(ebsa)
+summary(nebsa)
+
 rm(mpa_corrected_extract_values_noNA, non_mpa_extract_values_noNA,
    ebsa_extract_values_noNA, non_ebsa_extract_values_noNA)
 
