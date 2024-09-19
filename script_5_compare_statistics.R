@@ -8,11 +8,13 @@
 #Load package
 library(MASS)
 
+#################################### NOT USED ##################################
+
 #Load
-load("~/github/shipless_areas/mpa_corrected_extract_values_noNA.RData")
-load("~/github/shipless_areas/ebsa_extract_values_noNA.RData")
-load("~/github/shipless_areas/non_ebsa_extract_values_noNA.RData")
-load("~/github/shipless_areas/non_mpa_extract_values_noNA.RData")
+load("/media/jorgeassis/FMestre/shipless_areas/mpa_corrected_extract_values_noNA.RData")
+load("/media/jorgeassis/FMestre/shipless_areas/ebsa_extract_values_noNA.RData")
+load("/media/jorgeassis/FMestre/shipless_areas/non_ebsa_extract_values_noNA.RData")
+load("/media/jorgeassis/FMestre/shipless_areas/non_mpa_extract_values_noNA.RData")
 
 mpa <- mpa_corrected_extract_values_noNA
 nmpa <- non_mpa_extract_values_noNA

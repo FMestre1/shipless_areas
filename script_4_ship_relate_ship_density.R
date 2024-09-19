@@ -13,7 +13,6 @@ library(beanplot)
 #                                 Load data
 ################################################################################
 
-
 ################################## SHIP DENSITY ################################
 
 all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
