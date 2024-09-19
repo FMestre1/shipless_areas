@@ -9,3 +9,4 @@ library(aquamapsdata)
 #default_db("sqlite")
 #am_citation()
 
+#... unpacking /tmp/am.db.bz2 to ~/.config/aquamaps/am.db
