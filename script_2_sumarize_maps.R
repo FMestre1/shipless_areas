@@ -267,7 +267,6 @@ rownames(mean_sd_fishing_summed_stack) <- 1:nrow(mean_sd_fishing_summed_stack)
 save(mean_sd_fishing_summed_stack, file = "mean_sd_fishing_summed_stack.RData")
 plot(mean_sd_fishing_summed_stack$years, mean_sd_fishing_summed_stack$mean, type = "l", main = "Fishing ships", xlab = "year", ylab = "Ship density (hours/cell)")
 
-
 ##### COMBINE ALL PLOTS #####
 #plot(mean_sd_all_summed_stack$years, mean_sd_all_summed_stack$mean, type = "l", xlab = "year", ylab = "Ship density (hours/cell)")
 #lines(mean_sd_cargo_summed_stack$years, mean_sd_cargo_summed_stack$mean, col = "darkred")
