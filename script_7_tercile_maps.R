@@ -16,11 +16,21 @@ all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_
 cargo_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
 tankers_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
 fishing_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
+#
+#plot(all_summed)
+#plot(cargo_summed)
+#plot(tankers_summed)
+#plot(fishing_summed)
 
 #### 2. Load species richness maps
 cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
 testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
 pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
+#
+#plot(cetaceans_sr_raster)
+#plot(testudines_sr_raster)
+#plot(pinnipeds_sr_raster)
+
 
 #### 3. Same resolution and extent
 
