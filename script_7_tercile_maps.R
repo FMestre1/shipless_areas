@@ -21,6 +21,11 @@ cargo_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_cargo/
 tankers_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
 fishing_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
 #
+all_summed <- terra::rast("E:/shipless_areas/all_summed.tif")
+cargo_summed <- terra::rast("E:/shipless_areas/cargo_summed.tif")
+tankers_summed <- terra::rast("E:/shipless_areas/tankers_summed.tif")
+fishing_summed <- terra::rast("E:/shipless_areas/fishing_summed.tif")
+#
 #plot(all_summed)
 #plot(cargo_summed)
 #plot(tankers_summed)
@@ -75,6 +80,18 @@ all_summed_resampled <- resample(all_summed, cetaceans_sr_raster)
 cargo_summed_resampled <- resample(cargo_summed, cetaceans_sr_raster)
 tankers_summed_resampled <- resample(tankers_summed, cetaceans_sr_raster)
 fishing_summed_resampled <- resample(fishing_summed, cetaceans_sr_raster)
+#Save
+terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled.tif")
+terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif")
+terra::writeRaster(tankers_summed_resampled, filename = "tankers_summed_resampled.tif")
+terra::writeRaster(fishing_summed_resampled, filename = "fishing_summed_resampled.tif")
+#Load
+all_summed_resampled <- terra::rast("all_summed_resampled.tif")
+cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
+tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
+fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
+
+
 #terra::res(all_summed_resampled)
 #terra::res(cargo_summed_resampled)
 #terra::res(tankers_summed_resampled)
@@ -155,14 +172,14 @@ plot(terciles_reclassified_testudines)
 plot(terciles_reclassified_pinnipeds)
 
 #Save
-terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif")
-terra::writeRaster(terciles_reclassified_cargo_summed, filename = "terciles_reclassified_cargo_summed.tif")
-terra::writeRaster(terciles_reclassified_tankers_summed, filename = "terciles_reclassified_tankers_summed.tif")
-terra::writeRaster(terciles_reclassified_fishing_summed, filename = "terciles_reclassified_fishing_summed.tif")
+terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_cargo_summed, filename = "terciles_reclassified_cargo_summed.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_tankers_summed, filename = "terciles_reclassified_tankers_summed.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_fishing_summed, filename = "terciles_reclassified_fishing_summed.tif", overwrite = TRUE)
 #
-terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclassified_cetaceans.tif")
-terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif")
-terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif")
+terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclassified_cetaceans.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif", overwrite = TRUE)
 
 #Load
 terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
@@ -177,8 +194,6 @@ terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.
 ##############################
 
 library(bivariatemaps)
-
-colormatrix <- col.matrix<-colmat(nquantiles=3, xlab="Shipping density", ylab="Cetacean richness")
 
 colormatrix <- colmat(
   nquantiles = 3,
