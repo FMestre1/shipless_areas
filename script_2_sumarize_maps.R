@@ -15,7 +15,7 @@ library(terra)
 ###################################### Setting working directory ######################################
 
 #Set wd
-setwd("~/shipless_areas")
+setwd("/home/fredmestre/shipless_areas2")
 
 ###################################### Create folder for temp files ######################################
 

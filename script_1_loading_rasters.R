@@ -8,7 +8,8 @@
 #Load package
 library(terra)
 #getwd()
-set("/home/fredmestre/shipless_areas")
+setwd("/home/fredmestre/shipless_areas2")
+ls()
 
 #file.access(dir("."), mode = 4)
 
