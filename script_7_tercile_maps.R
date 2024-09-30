@@ -164,41 +164,33 @@ terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclass
 terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif")
 terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif")
 
+#Load
+terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
+terciles_reclassified_cargo_summed <- terra::rast("terciles_reclassified_cargo_summed.tif")
+terciles_reclassified_tankers_summed <- terra::rast("terciles_reclassified_tankers_summed.tif")
+terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishing_summed.tif")
+#
+terciles_reclassified_cetaceans <- terra::rast("terciles_reclassified_cetaceans.tif")
+terciles_reclassified_testudines <- terra::rast("terciles_reclassified_testudines.tif")
+terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.tif")
 
-library(tidyverse) # ggplot2, dplyr, tidyr, readr, purrr, tibble
+##############################
 
+library(bivariatemaps)
 
-# create color scale that encodes two variables
-# red for gini and blue for mean income
-# the special notation with gather is due to readibility reasons
-bivariate_color_scale <- tibble(
-  "3 - 3" = "#3F2949",
-  "2 - 3" = "#435786",
-  "1 - 3" = "#4885C1",
-  "3 - 2" = "#77324C",
-  "2 - 2" = "#806A8A",
-  "1 - 2" = "#89A1C8",
-  "3 - 1" = "#AE3A4E",
-  "2 - 1" = "#BC7C8F",
-  "1 - 1" = "#CABED0" 
-) %>%
-  gather("group", "fill")
+colormatrix <- col.matrix<-colmat(nquantiles=3, xlab="Shipping density", ylab="Cetacean richness")
 
+colormatrix <- colmat(
+  nquantiles = 3,
+  upperleft = "blue",
+  upperright = "red",
+  bottomleft = "grey",
+  bottomright = "yellow",
+  xlab = "x label",
+  ylab = "y label"
+)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+all_summed_vs_cetaceans <- bivariate.map(all_summed, cetaceans_sr_raster, colormatrix, nquantiles = 3)
 
 
 
