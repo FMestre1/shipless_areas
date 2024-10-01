@@ -3,24 +3,33 @@
 ################################################################################
 
 #FMestre
-#18-09-2024
+#30-09-2024
 
-#https://timogrossenbacher.ch/bivariate-maps-with-ggplot2-and-sf/
-#https://cran.r-project.org/web/packages/biscale/vignettes/biscale.html
-
-#WD
-setwd("/home/fredmestre/shipless_areas2")
-
-#Load library
-library(biscale)
+#Load packages
+library(data.table)
 library(terra)
+library(classInt)
+library(patchwork)
+library(ggplot2)
+library(cowplot)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
 
 #### 1. Load ship density maps
+
+all_summed_resampled <- terra::rast("all_summed_resampled.tif")
+cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
+tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
+fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
+
+# CCMAR computer
 all_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_all/all_summed.tif")
 cargo_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
 tankers_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
 fishing_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
-#
+
+# My disk
 all_summed <- terra::rast("E:/shipless_areas/all_summed.tif")
 cargo_summed <- terra::rast("E:/shipless_areas/cargo_summed.tif")
 tankers_summed <- terra::rast("E:/shipless_areas/tankers_summed.tif")
@@ -36,177 +45,1105 @@ cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
 testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
 pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
 #
-#plot(cetaceans_sr_raster)
-#plot(testudines_sr_raster)
-#plot(pinnipeds_sr_raster)
 
-#### 3. Same resolution and extent
+#Required functions
 
-# 3.1. Check CRS of both rasters
-terra::crs(all_summed)
-terra::crs(cargo_summed)
-terra::crs(tankers_summed)
-terra::crs(fishing_summed)
-#
-terra::crs(cetaceans_sr_raster)
-terra::crs(testudines_sr_raster)
-terra::crs(pinnipeds_sr_raster)
+#adapted from:
+#https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188#file-bivarrasterplot-r
 
-# 3.2. Align rastes
-
-#Check extent and resolution
-
-terra::ext(all_summed)
-#terra::ext(cargo_summed)
-#terra::ext(tankers_summed)
-#terra::ext(fishing_summed)
-#
-terra::res(all_summed)
-#terra::res(cargo_summed)
-#terra::res(tankers_summed)
-#terra::res(fishing_summed)
-#
-terra::ext(cetaceans_sr_raster)
-#terra::ext(testudines_sr_raster)
-#terra::ext(pinnipeds_sr_raster)
-#
-terra::res(cetaceans_sr_raster)
-#terra::res(testudines_sr_raster)
-#terra::res(pinnipeds_sr_raster)
-
-#
-# Resample to match the resolution of raster1
-all_summed_resampled <- resample(all_summed, cetaceans_sr_raster)
-cargo_summed_resampled <- resample(cargo_summed, cetaceans_sr_raster)
-tankers_summed_resampled <- resample(tankers_summed, cetaceans_sr_raster)
-fishing_summed_resampled <- resample(fishing_summed, cetaceans_sr_raster)
-#Save
-terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled.tif")
-terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif")
-terra::writeRaster(tankers_summed_resampled, filename = "tankers_summed_resampled.tif")
-terra::writeRaster(fishing_summed_resampled, filename = "fishing_summed_resampled.tif")
-#Load
-all_summed_resampled <- terra::rast("all_summed_resampled.tif")
-cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
-tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
-fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
-
-
-#terra::res(all_summed_resampled)
-#terra::res(cargo_summed_resampled)
-#terra::res(tankers_summed_resampled)
-#terra::res(fishing_summed_resampled)
-
-
-terra::global(all_summed_resampled, fun=quantile, na.rm = TRUE)
-?terra::quantile
-
-# Calculate the tercile breakpoints
-terciles_all_summed <- quantile(values(all_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_cargo_summed <- quantile(values(cargo_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_tankers_summed <- quantile(values(tankers_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_fishing_summed <- quantile(values(fishing_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
-#
-terciles_cetaceans_sr_raster <- quantile(values(cetaceans_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_testudines_sr_raster <- quantile(values(testudines_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_pinnipeds_sr_raster <- quantile(values(pinnipeds_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
-
-
-# Classify the raster into terciles
-# Create a matrix for classification
-class_matrix_all_summed <- matrix(c(0, terciles_all_summed[1], 1,  # First tercile
-                                 terciles_all_summed[1], terciles_all_summed[2], 2,  # Second tercile
-                                 terciles_all_summed[2], as.numeric(global(all_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                 ncol = 3, byrow = TRUE)
-
-class_matrix_cargo_summed <- matrix(c(0, terciles_cargo_summed[1], 1,  # First tercile
-                                  terciles_cargo_summed[1], terciles_cargo_summed[2], 2,  # Second tercile
-                                  terciles_cargo_summed[2], as.numeric(global(cargo_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                  ncol = 3, byrow = TRUE)
-
-class_matrix_tankers_summed <- matrix(c(0, terciles_tankers_summed[1], 1,  # First tercile
-                                  terciles_tankers_summed[1], terciles_tankers_summed[2], 2,  # Second tercile
-                                  terciles_tankers_summed[2], as.numeric(global(tankers_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                   ncol = 3, byrow = TRUE)
-
-class_matrix_fishing_summed <- matrix(c(0, terciles_fishing_summed[1], 1,  # First tercile
-                                   terciles_fishing_summed[1], terciles_fishing_summed[2], 2,  # Second tercile
-                                   terciles_fishing_summed[2], as.numeric(global(fishing_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                   ncol = 3, byrow = TRUE)
-
-class_matrix_cetaceans <- matrix(c(as.numeric(global(cetaceans_sr_raster, fun=min, na.rm=TRUE)), terciles_cetaceans_sr_raster[1], 1,  # First tercile
-                                   terciles_cetaceans_sr_raster[1], terciles_cetaceans_sr_raster[2], 2,  # Second tercile
-                                   terciles_cetaceans_sr_raster[2], as.numeric(global(cetaceans_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                    ncol = 3, byrow = TRUE)
-
-class_matrix_testudines <- matrix(c(as.numeric(global(testudines_sr_raster, fun=min, na.rm=TRUE)), terciles_testudines_sr_raster[1], 1,  # First tercile
-                                    terciles_testudines_sr_raster[1], terciles_testudines_sr_raster[2], 2,  # Second tercile
-                                    terciles_testudines_sr_raster[2], as.numeric(global(testudines_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                    ncol = 3, byrow = TRUE)
+colmat <- function(nbreaks = 3, breakstyle = "quantile",
+                   upperleft = "#0096EB", upperright = "#820050", 
+                   bottomleft = "#BEBEBE", bottomright = "#FFE60F",
+                   xlab = "x label", ylab = "y label", plotLeg = TRUE,
+                   saveLeg = FALSE) {
+  # Load required libraries
+  library(terra)
+  require(ggplot2)
+  require(classInt)
+  require(data.table)
+  
+  if (breakstyle == "sd") {
+    warning("SD breaks style cannot be used.\nWill not always return the correct number of breaks.\nSee classInt::classIntervals() for details.\nResetting to quantile",
+            call. = FALSE, immediate. = FALSE)
+    breakstyle <- "quantile"
+  }
+  
+  my.data <- seq(0, 1, .01)
+  my.class <- classInt::classIntervals(my.data, n = nbreaks, style = breakstyle)
+  my.pal.1 <- classInt::findColours(my.class, c(upperleft, bottomleft))
+  my.pal.2 <- classInt::findColours(my.class, c(upperright, bottomright))
+  
+  col.matrix <- matrix(nrow = 101, ncol = 101, NA)
+  
+  for (i in 1:101) {
+    my.col <- c(paste(my.pal.1[i]), paste(my.pal.2[i]))
+    col.matrix[102 - i, ] <- classInt::findColours(my.class, my.col)
+  }
+  
+  # Convert the matrix into a data.table for plotting
+  col.matrix.dt <- as.data.table(as.data.frame(col.matrix))
+  col.matrix.dt[, Y := .I]  # Create a Y column as row number
+  
+  # Melt the data.table to long format
+  col.matrix.dt <- melt(col.matrix.dt, id.vars = "Y", variable.name = "X", value.name = "HEXCode")
+  
+  # Convert X to integer by removing the "V" from the column names
+  col.matrix.dt[, X := as.integer(sub("V", "", X))]
+  
+  # Remove duplicates and reverse the Y column
+  col.matrix.dt <- col.matrix.dt[!duplicated(HEXCode)]
+  col.matrix.dt[, Y := rev(Y)]
+  
+  # Adjust X and Y for plotting
+  col.matrix.dt[, `:=`(Y = rep(1:nbreaks, each = nbreaks), X = rep(1:nbreaks, times = nbreaks))]
+  col.matrix.dt[, UID := .I]  # Create a UID column
+  
+  # Plot the legend if needed
+  if (plotLeg) {
+    p <- ggplot(col.matrix.dt, aes(X, Y, fill = HEXCode)) +
+      geom_tile() +
+      scale_fill_identity() +
+      coord_equal(expand = FALSE) +
+      theme_void() +
+      theme(aspect.ratio = 1,
+            axis.title = element_text(size = 12, colour = "black", hjust = 0.5, vjust = 1),
+            axis.title.y = element_text(angle = 90, hjust = 0.5)) +
+      xlab(bquote(.(xlab) ~  symbol("\256"))) +
+      ylab(bquote(.(ylab) ~  symbol("\256")))
+    
+    print(p)
+    assign("BivLegend", p, envir = .GlobalEnv)
+  }
+  
+  # Save the legend if required
+  if (saveLeg) {
+    ggsave(filename = "bivLegend.pdf", plot = p, device = "pdf",
+           path = "./", width = 4, height = 4, units = "in", dpi = 300)
+  }
+  
+  seqs <- seq(0, 100, length.out = nbreaks + 1)
+  seqs[1] <- 1
+  col.matrix <- col.matrix[seqs, seqs]
+  
+  attr(col.matrix, "breakstyle") <- breakstyle
+  attr(col.matrix, "nbreaks") <- nbreaks
+  
+  return(col.matrix)
+}
 
 
-class_matrix_pinnipeds <- matrix(c(as.numeric(global(pinnipeds_sr_raster, fun=min, na.rm=TRUE)), terciles_pinnipeds_sr_raster[1], 1,  # First tercile
-                                  terciles_pinnipeds_sr_raster[1], terciles_pinnipeds_sr_raster[2], 2,  # Second tercile
-                                  terciles_pinnipeds_sr_raster[2], as.numeric(global(pinnipeds_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                  ncol = 3, byrow = TRUE)
+bivariate.map <- function(rasterx, rastery, colourmatrix = col.matrix,
+                          export.colour.matrix = TRUE,
+                          outname = paste0("colMatrix_rasValues", names(rasterx))) {
+  # Load required libraries
+  require(terra)
+  require(classInt)
+  
+  # Export colour matrix to a data.frame in the global environment if specified
+  quanx <- values(rasterx)
+  tempx <- data.frame(quanx = quanx, quantile = rep(NA, length(quanx)))
+  brks <- with(tempx, classIntervals(quanx,
+                                     n = attr(colourmatrix, "nbreaks"),
+                                     style = attr(colourmatrix, "breakstyle"))$brks)
+  
+  # Add small noise to breaks
+  brks[-1] <- brks[-1] + seq_along(brks[-1]) * .Machine$double.eps
+  r1 <- within(tempx, quantile <- cut(quanx,
+                                      breaks = brks,
+                                      labels = 2:length(brks),
+                                      include.lowest = TRUE))
+  quantr <- data.frame(r1[, 2])
+  
+  quany <- values(rastery)
+  tempy <- data.frame(quany = quany, quantile = rep(NA, length(quany)))
+  brksy <- with(tempy, classIntervals(quany,
+                                      n = attr(colourmatrix, "nbreaks"),
+                                      style = attr(colourmatrix, "breakstyle"))$brks)
+  
+  brksy[-1] <- brksy[-1] + seq_along(brksy[-1]) * .Machine$double.eps
+  r2 <- within(tempy, quantile <- cut(quany,
+                                      breaks = brksy,
+                                      labels = 2:length(brksy),
+                                      include.lowest = TRUE))
+  quantr2 <- data.frame(r2[, 2])
+  
+  as.numeric.factor <- function(x) {
+    as.numeric(levels(x))[x]
+  }
+  
+  col.matrix2 <- colourmatrix
+  cn <- unique(colourmatrix)
+  
+  for (i in 1:length(col.matrix2)) {
+    ifelse(is.na(col.matrix2[i]),
+           col.matrix2[i] <- 1, 
+           col.matrix2[i] <- which(col.matrix2[i] == cn)[1]
+    )
+  }
+  
+  # Export the colour matrix to data.frame in the global environment
+  if (export.colour.matrix) {
+    exportCols <- as.data.frame(cbind(
+      as.vector(col.matrix2), 
+      as.vector(colourmatrix), 
+      t(col2rgb(as.vector(colourmatrix)))
+    ))
+    colnames(exportCols)[1:2] <- c("rasValue", "HEX")
+    
+    # Export to the global environment
+    assign(
+      x = outname,
+      value = exportCols,
+      pos = .GlobalEnv
+    )
+  }
+  
+  cols <- numeric(length(quantr[, 1]))
+  
+  for (i in 1:length(quantr[, 1])) {
+    a <- as.numeric.factor(quantr[i, 1])
+    b <- as.numeric.factor(quantr2[i, 1])
+    cols[i] <- as.numeric(col.matrix2[b, a])
+  }
+  
+  # Create a new raster from the modified values
+  r <- rasterx
+  values(r) <- cols  # Assign new values to raster
+  
+  return(r)
+}
+
+#Load world vector data
+world <- ne_coastline(scale = "medium", returnclass = "sf")
 
 
-# Apply the classification
-terciles_reclassified_all_summed <- terra::classify(all_summed_resampled, class_matrix_all_summed)
-terciles_reclassified_cargo_summed <- terra::classify(cargo_summed_resampled, class_matrix_cargo_summed)
-terciles_reclassified_tankers_summed <- terra::classify(tankers_summed_resampled, class_matrix_tankers_summed)
-terciles_reclassified_fishing_summed <- terra::classify(fishing_summed_resampled, class_matrix_fishing_summed)
-#
-terciles_reclassified_cetaceans <- terra::classify(cetaceans_sr_raster, class_matrix_cetaceans)
-terciles_reclassified_testudines <- terra::classify(testudines_sr_raster, class_matrix_testudines)
-terciles_reclassified_pinnipeds <- terra::classify(pinnipeds_sr_raster, class_matrix_pinnipeds)
+################################################################################
+################################################################################
+# Cetaceans
 
-# Plot the result
-plot(terciles_reclassified_all_summed)
-plot(terciles_reclassified_cargo_summed)
-plot(terciles_reclassified_tankers_summed)
-plot(terciles_reclassified_fishing_summed)
-#
-plot(terciles_reclassified_cetaceans)
-plot(terciles_reclassified_testudines)
-plot(terciles_reclassified_pinnipeds)
+# Create the colour matrix
+col.matrix <- colmat(nbreaks = 3, breakstyle = "quantile",
+                        xlab = "Ship density", ylab = "Cetacean richness", 
+                        bottomright = "#4885C1", upperright = "#3F2949",
+                        bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                        saveLeg = FALSE, plotLeg = TRUE)
 
-#Save
-terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_cargo_summed, filename = "terciles_reclassified_cargo_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_tankers_summed, filename = "terciles_reclassified_tankers_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_fishing_summed, filename = "terciles_reclassified_fishing_summed.tif", overwrite = TRUE)
-#
-terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclassified_cetaceans.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif", overwrite = TRUE)
+# create the bivariate raster
+all_ships_vs_cetaceans <- bivariate.map(rasterx = all_summed_resampled, rastery = cetaceans_sr_raster,
+                           export.colour.matrix = FALSE,
+                           colourmatrix = col.matrix)
 
-#Load
-terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
-terciles_reclassified_cargo_summed <- terra::rast("terciles_reclassified_cargo_summed.tif")
-terciles_reclassified_tankers_summed <- terra::rast("terciles_reclassified_tankers_summed.tif")
-terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishing_summed.tif")
-#
-terciles_reclassified_cetaceans <- terra::rast("terciles_reclassified_cetaceans.tif")
-terciles_reclassified_testudines <- terra::rast("terciles_reclassified_testudines.tif")
-terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.tif")
+# Convert to dataframe for plotting with ggplot
+all_ships_vs_cetaceans <- setDT(as.data.frame(all_ships_vs_cetaceans, xy = TRUE))
+colnames(all_ships_vs_cetaceans)[3] <- "BivValue"
+all_ships_vs_cetaceans_2 <- melt(all_ships_vs_cetaceans, id.vars = c("x", "y"),
+                    measure.vars = "BivValue",
+                    value.name = "bivVal",
+                    variable.name = "Variable")
 
-##############################
+# Create the map
+map_all_ships_cetaceans <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = all_ships_vs_cetaceans_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
 
-library(bivariatemaps)
+# Print the final map
+map_all_ships_cetaceans
 
-colormatrix <- colmat(
-  nquantiles = 3,
-  upperleft = "blue",
-  upperright = "red",
-  bottomleft = "grey",
-  bottomright = "yellow",
-  xlab = "x label",
-  ylab = "y label"
-)
+# Add the title directly to the main plot so it scales with zoom
+cetaceans_ships_main_plot_with_title <- map_all_ships_cetaceans + 
+  ggtitle("Ship density vs Cetacean Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
 
-all_summed_vs_cetaceans <- bivariate.map(all_summed, cetaceans_sr_raster, colormatrix, nquantiles = 3)
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_cet_ships <- ggdraw() +
+  draw_plot(cetaceans_ships_main_plot_with_title) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
 
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_cet_ships
+
+################################################################################
+################################################################################
+# Sea Turtles
+
+# Create the colour matrix
+col.matrix2 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                     xlab = "Ship density", ylab = "Sea turtle richness", 
+                     bottomright = "#4885C1", upperright = "#3F2949",
+                     bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                     saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+all_ships_vs_turtles <- bivariate.map(rasterx = all_summed_resampled, rastery = testudines_sr_raster,
+                                        export.colour.matrix = FALSE,
+                                        colourmatrix = col.matrix2)
+
+# Convert to dataframe for plotting with ggplot
+all_ships_vs_turtles <- setDT(as.data.frame(all_ships_vs_turtles, xy = TRUE))
+colnames(all_ships_vs_turtles)[3] <- "BivValue"
+all_ships_vs_turtles_2 <- melt(all_ships_vs_turtles, id.vars = c("x", "y"),
+                                 measure.vars = "BivValue",
+                                 value.name = "bivVal",
+                                 variable.name = "Variable")
+
+# Create the map
+map_all_ships_turtles <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = all_ships_vs_turtles_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix2, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_turtles
+
+# Add the title directly to the main plot so it scales with zoom
+turtles_ships_main_plot_with_title <- map_all_ships_turtles + 
+  ggtitle("Ship density vs Sea Turtle Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_turtles_ships <- ggdraw() +
+  draw_plot(turtles_ships_main_plot_with_title) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_turtles_ships
+
+
+################################################################################
+################################################################################
+# Pinnipeds
+
+# Create the colour matrix
+col.matrix3 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Ship density", ylab = "Pinniped richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+all_ships_vs_pinnipeds <- bivariate.map(rasterx = all_summed_resampled, rastery = pinnipeds_sr_raster,
+                                      export.colour.matrix = FALSE,
+                                      colourmatrix = col.matrix3)
+
+# Convert to dataframe for plotting with ggplot
+all_ships_vs_pinnipeds <- setDT(as.data.frame(all_ships_vs_pinnipeds, xy = TRUE))
+colnames(all_ships_vs_pinnipeds)[3] <- "BivValue"
+all_ships_vs_pinnipeds_2 <- melt(all_ships_vs_pinnipeds, id.vars = c("x", "y"),
+                               measure.vars = "BivValue",
+                               value.name = "bivVal",
+                               variable.name = "Variable")
+
+# Create the map
+map_all_ships_pinnipeds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = all_ships_vs_pinnipeds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix3, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_pinnipeds
+
+# Add the title directly to the main plot so it scales with zoom
+pinniped_ships_main_plot_with_title <- map_all_ships_pinnipeds + 
+  ggtitle("Ship density vs Sea Pinniped Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_pinniped_ships <- ggdraw() +
+  draw_plot(pinniped_ships_main_plot_with_title) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_pinniped_ships
+
+################################################################################
+################################################################################
+# Cetaceans vs tankers
+
+# Create the colour matrix
+col.matrix4 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                     xlab = "Tanker density", ylab = "Cetacean richness", 
+                     bottomright = "#4885C1", upperright = "#3F2949",
+                     bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                     saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+tankers_vs_cetaceans <- bivariate.map(rasterx = tankers_summed_resampled, rastery = cetaceans_sr_raster,
+                                        export.colour.matrix = FALSE,
+                                        colourmatrix = col.matrix4)
+
+# Convert to dataframe for plotting with ggplot
+tankers_vs_cetaceans <- setDT(as.data.frame(tankers_vs_cetaceans, xy = TRUE))
+colnames(tankers_vs_cetaceans)[3] <- "BivValue"
+tankers_vs_cetaceans_2 <- melt(tankers_vs_cetaceans, id.vars = c("x", "y"),
+                                 measure.vars = "BivValue",
+                                 value.name = "bivVal",
+                                 variable.name = "Variable")
+
+# Create the map
+map_all_ships_cetaceans_tank <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = tankers_vs_cetaceans_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix4, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_cetaceans_tank
+
+# Add the title directly to the main plot so it scales with zoom
+cetaceans_ships_main_plot_with_title_tank <- map_all_ships_cetaceans_tank + 
+  ggtitle("Tanker density vs Cetacean Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_cet_ships_tank <- ggdraw() +
+  draw_plot(cetaceans_ships_main_plot_with_title_tank) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_cet_ships_tank
+
+################################################################################
+################################################################################
+# Cetaceans vs cargo ships
+
+# Create the colour matrix
+col.matrix5 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Cargo ship density", ylab = "Cetacean richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+cargo_vs_cetaceans <- bivariate.map(rasterx = cargo_summed_resampled, rastery = cetaceans_sr_raster,
+                                              export.colour.matrix = FALSE,
+                                              colourmatrix = col.matrix5)
+
+# Convert to dataframe for plotting with ggplot
+cargo_vs_cetaceans <- setDT(as.data.frame(cargo_vs_cetaceans, xy = TRUE))
+colnames(cargo_vs_cetaceans)[3] <- "BivValue"
+cargo_vs_cetaceans_2 <- melt(cargo_vs_cetaceans, id.vars = c("x", "y"),
+                                       measure.vars = "BivValue",
+                                       value.name = "bivVal",
+                                       variable.name = "Variable")
+
+# Create the map
+map_all_ships_cetaceans_cargo <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = cargo_vs_cetaceans_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix5, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_cetaceans_cargo
+
+# Add the title directly to the main plot so it scales with zoom
+cetaceans_ships_main_plot_with_title_cargo <- map_all_ships_cetaceans_cargo + 
+  ggtitle("Cargo ships density vs Cetacean Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_cet_ships_cargo <- ggdraw() +
+  draw_plot(cetaceans_ships_main_plot_with_title_cargo) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_cet_ships_cargo
+
+################################################################################
+################################################################################
+# Cetaceans vs fishing ships
+
+# Create the colour matrix
+col.matrix6 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Fishing ship density", ylab = "Cetacean richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+fishing_ships_vs_cetaceans <- bivariate.map(rasterx = fishing_summed_resampled, rastery = cetaceans_sr_raster,
+                                            export.colour.matrix = FALSE,
+                                            colourmatrix = col.matrix6)
+
+# Convert to dataframe for plotting with ggplot
+fishing_ships_vs_cetaceans <- setDT(as.data.frame(fishing_ships_vs_cetaceans, xy = TRUE))
+colnames(fishing_ships_vs_cetaceans)[3] <- "BivValue"
+fishing_ships_vs_cetaceans_2 <- melt(fishing_ships_vs_cetaceans, id.vars = c("x", "y"),
+                                     measure.vars = "BivValue",
+                                     value.name = "bivVal",
+                                     variable.name = "Variable")
+
+# Create the map
+map_fishing_cetaceans <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = fishing_ships_vs_cetaceans_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix6, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_fishing_cetaceans
+
+# Add the title directly to the main plot so it scales with zoom
+cetaceans_ships_main_plot_with_title_fisihing <- map_fishing_cetaceans + 
+  ggtitle("Fishing ships density vs Cetacean Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_cet_ships_fisihing <- ggdraw() +
+  draw_plot(cetaceans_ships_main_plot_with_title_fisihing) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_cet_ships_fisihing
+
+################################################################################
+################################################################################
+# Turtles vs tankers
+
+# Create the colour matrix
+col.matrix7 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Tanker density", ylab = "Sea turtles richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+tankers_vs_turtles <- bivariate.map(rasterx = tankers_summed_resampled, rastery = testudines_sr_raster,
+                                    export.colour.matrix = FALSE,
+                                    colourmatrix = col.matrix7)
+
+# Convert to dataframe for plotting with ggplot
+tankers_vs_turtles <- setDT(as.data.frame(tankers_vs_turtles, xy = TRUE))
+colnames(tankers_vs_turtles)[3] <- "BivValue"
+tankers_vs_turtles_2 <- melt(tankers_vs_turtles, id.vars = c("x", "y"),
+                             measure.vars = "BivValue",
+                             value.name = "bivVal",
+                             variable.name = "Variable")
+
+# Create the map
+map_all_ships_turtles_tank <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = tankers_vs_turtles_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix7, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_turtles_tank
+
+# Add the title directly to the main plot so it scales with zoom
+turtles_ships_main_plot_with_title_tank <- map_all_ships_turtles_tank + 
+  ggtitle("Tanker density vs Sea turtle Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_turtles_ships_tank <- ggdraw() +
+  draw_plot(turtles_ships_main_plot_with_title_tank) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_turtles_ships_tank
+
+################################################################################
+################################################################################
+# Turtles vs cargo ships
+
+# Create the colour matrix
+col.matrix8 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Cargo ships density", ylab = "Sea turtles richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+cargo_vs_turtles <- bivariate.map(rasterx = cargo_summed_resampled, rastery = testudines_sr_raster,
+                                  export.colour.matrix = FALSE,
+                                  colourmatrix = col.matrix8)
+
+# Convert to dataframe for plotting with ggplot
+cargo_vs_turtles <- setDT(as.data.frame(cargo_vs_turtles, xy = TRUE))
+colnames(cargo_vs_turtles)[3] <- "BivValue"
+cargo_vs_turtles_2 <- melt(cargo_vs_turtles, id.vars = c("x", "y"),
+                           measure.vars = "BivValue",
+                           value.name = "bivVal",
+                           variable.name = "Variable")
+
+# Create the map
+map_cargo_turtles <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = cargo_vs_turtles_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix8, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_cargo_turtles
+
+# Add the title directly to the main plot so it scales with zoom
+turtles_ships_main_plot_with_title_cargo <- map_cargo_turtles + 
+  ggtitle("Cargo ship density vs Sea turtle Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_turtles_ships_cargo <- ggdraw() +
+  draw_plot(turtles_ships_main_plot_with_title_cargo) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_turtles_ships_cargo
+
+################################################################################
+################################################################################
+# Turtles vs fishing ships
+
+# Create the colour matrix
+col.matrix9 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Fishing ships density", ylab = "Sea turtles richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+fishing_vs_turtles <- bivariate.map(rasterx = fishing_summed_resampled, rastery = testudines_sr_raster,
+                                    export.colour.matrix = FALSE,
+                                    colourmatrix = col.matrix9)
+
+# Convert to dataframe for plotting with ggplot
+fishing_vs_turtles <- setDT(as.data.frame(fishing_vs_turtles, xy = TRUE))
+colnames(fishing_vs_turtles)[3] <- "BivValue"
+fishing_vs_turtles_2 <- melt(fishing_vs_turtles, id.vars = c("x", "y"),
+                             measure.vars = "BivValue",
+                             value.name = "bivVal",
+                             variable.name = "Variable")
+
+# Create the map
+map_fishing_turtles <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = fishing_vs_turtles_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix9, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_fishing_turtles
+
+# Add the title directly to the main plot so it scales with zoom
+turtles_ships_main_plot_with_title_fishing <- map_fishing_turtles + 
+  ggtitle("Fishing ship density vs Sea turtle Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_turtles_ships_fishing <- ggdraw() +
+  draw_plot(turtles_ships_main_plot_with_title_fishing) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_turtles_ships_fishing
+
+################################################################################
+################################################################################
+# Pinnipeds vs tankers
+
+# Create the colour matrix
+col.matrix10 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                       xlab = "Tanker density", ylab = "Pinnipeds richness", 
+                       bottomright = "#4885C1", upperright = "#3F2949",
+                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                       saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+tankers_vs_pinnipeds <- bivariate.map(rasterx = tankers_summed_resampled, rastery = pinnipeds_sr_raster,
+                                      export.colour.matrix = FALSE,
+                                      colourmatrix = col.matrix10)
+
+# Convert to dataframe for plotting with ggplot
+tankers_vs_pinnipeds <- setDT(as.data.frame(tankers_vs_pinnipeds, xy = TRUE))
+colnames(tankers_vs_pinnipeds)[3] <- "BivValue"
+tankers_vs_pinnipeds_2 <- melt(tankers_vs_pinnipeds, id.vars = c("x", "y"),
+                               measure.vars = "BivValue",
+                               value.name = "bivVal",
+                               variable.name = "Variable")
+
+# Create the map
+map_all_ships_pinnipeds_tank <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = tankers_vs_pinnipeds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix10, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_pinnipeds_tank
+
+# Add the title directly to the main plot so it scales with zoom
+pinnipeds_ships_main_plot_with_title_tank <- map_all_ships_pinnipeds_tank + 
+  ggtitle("Tanker density vs Pinniped Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_pinnipeds_ships_tank <- ggdraw() +
+  draw_plot(pinnipeds_ships_main_plot_with_title_tank) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_pinnipeds_ships_tank
+
+################################################################################
+################################################################################
+# Pinnipeds vs cargo ships
+
+# Create the colour matrix
+col.matrix11 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                       xlab = "Cargo ships density", ylab = "Pinnipeds richness", 
+                       bottomright = "#4885C1", upperright = "#3F2949",
+                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                       saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+cargo_vs_pinnipeds <- bivariate.map(rasterx = cargo_summed_resampled, rastery = pinnipeds_sr_raster,
+                                    export.colour.matrix = FALSE,
+                                    colourmatrix = col.matrix11)
+
+# Convert to dataframe for plotting with ggplot
+cargo_vs_pinnipeds <- setDT(as.data.frame(cargo_vs_pinnipeds, xy = TRUE))
+colnames(cargo_vs_pinnipeds)[3] <- "BivValue"
+cargo_vs_pinnipeds_2 <- melt(cargo_vs_pinnipeds, id.vars = c("x", "y"),
+                             measure.vars = "BivValue",
+                             value.name = "bivVal",
+                             variable.name = "Variable")
+
+# Create the map
+map_cargo_pinnipeds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = cargo_vs_pinnipeds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix11, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_cargo_pinnipeds
+
+# Add the title directly to the main plot so it scales with zoom
+pinnipeds_ships_main_plot_with_title_cargo <- map_cargo_pinnipeds + 
+  ggtitle("Cargo ship density vs Pinniped Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_pinnipeds_ships_cargo <- ggdraw() +
+  draw_plot(pinnipeds_ships_main_plot_with_title_cargo) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_pinnipeds_ships_cargo
+
+################################################################################
+################################################################################
+# Pinnipeds vs fishing ships
+
+# Create the colour matrix
+col.matrix12 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                       xlab = "Fishing ships density", ylab = "Pinnipeds richness", 
+                       bottomright = "#4885C1", upperright = "#3F2949",
+                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                       saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+fishing_vs_pinnipeds <- bivariate.map(rasterx = fishing_summed_resampled, rastery = pinnipeds_sr_raster,
+                                      export.colour.matrix = FALSE,
+                                      colourmatrix = col.matrix12)
+
+# Convert to dataframe for plotting with ggplot
+fishing_vs_pinnipeds <- setDT(as.data.frame(fishing_vs_pinnipeds, xy = TRUE))
+colnames(fishing_vs_pinnipeds)[3] <- "BivValue"
+fishing_vs_pinnipeds_2 <- melt(fishing_vs_pinnipeds, id.vars = c("x", "y"),
+                               measure.vars = "BivValue",
+                               value.name = "bivVal",
+                               variable.name = "Variable")
+
+# Create the map
+map_fishing_pinnipeds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = fishing_vs_pinnipeds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix12, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_fishing_pinnipeds
+
+# Add the title directly to the main plot so it scales with zoom
+pinnipeds_ships_main_plot_with_title_fishing <- map_fishing_pinnipeds + 
+  ggtitle("Fishing ship density vs Pinniped Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_pinnipeds_ships_fishing <- ggdraw() +
+  draw_plot(pinnipeds_ships_main_plot_with_title_fishing) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_pinnipeds_ships_fishing
+
+################################################################################
+################################################################################
 
 
 
