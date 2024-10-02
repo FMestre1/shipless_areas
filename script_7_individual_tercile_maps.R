@@ -1,5 +1,5 @@
 ################################################################################
-#                       Bivariate Choropleth Maps
+#                    Individual Tercile-Reclassified Maps
 ################################################################################
 
 #FMestre
@@ -193,28 +193,3 @@ terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishi
 terciles_reclassified_cetaceans <- terra::rast("terciles_reclassified_cetaceans.tif")
 terciles_reclassified_testudines <- terra::rast("terciles_reclassified_testudines.tif")
 terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.tif")
-
-##############################
-
-library(bivariatemaps)
-
-colormatrix <- colmat(
-  #nquantiles = 3,
-  upperleft = "blue",
-  upperright = "red",
-  bottomleft = "grey",
-  bottomright = "yellow",
-  xlab = "Ship density",
-  ylab = "Cetacean richness"
-)
-
-all_summed_vs_cetaceans <- bivariatemaps::bivariate.map(all_summed, cetaceans_sr_raster, colormatrix, nquantiles = 3)
-
-plot(all_summed)
-plot(all_summed_vs_cetaceans)
-
-
-
-#cetaceans_vs_all_ships <- terciles_reclassified_cetaceans + (terciles_reclassified_all_summed*10)
-#plot(cetaceans_vs_all_ships)
-
