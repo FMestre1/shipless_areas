@@ -9,9 +9,6 @@
 library(terra)
 library(dplyr)
 
-#Continents
-#continent <- terra::vect("/media/fredmestre/FMestre/shipless_areas/shapes/ne_110m_admin_0_countries.shp")
-
 #Load density rasters (terciles)
 terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
 terciles_reclassified_cargo_summed <- terra::rast("terciles_reclassified_cargo_summed.tif")
@@ -22,11 +19,12 @@ terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishi
 #                       Marine Protected Area (MPA)
 ################################################################################
 
-#UNEP-WCMC and IUCN (2024), Protected Planet: The World Database on Protected Areas (WDPA) [Online], October 2024, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
+#UNEP-WCMC and IUCN (2024), Protected Planet: The World Database on Protected Areas (WDPA)
+#[Online], October 2024, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
 
-mpa <- terra::vect("shapes/mpa_assis.shp")
-plot(mpa)
-crs(mpa)
+mpa <- terra::vect("shapes/mpa_simplified.shp")
+#plot(mpa)
+#crs(mpa)
 
 # Extract raster values for each polygon
 extracted_values_mpa <- extract(terciles_reclassified_all_summed, 
@@ -34,11 +32,11 @@ extracted_values_mpa <- extract(terciles_reclassified_all_summed,
 
 mpa_df <- as.data.frame(mpa)
 mpa_df <- data.frame(1:nrow(mpa_df), mpa_df)
-colnames(mpa_df)[1] <- "ID_2"
+colnames(mpa_df)[1] <- "ID"
 #head(mpa_df)
 
 # merge two data frames by ID
-extracted_values_mpa_2 <- merge(extracted_values_mpa, mpa_df, by.x = "ID", by.y = "ID_2")
+extracted_values_mpa_2 <- merge(extracted_values_mpa, mpa_df, by.x = "ID", by.y = "ID")
 #head(extracted_values_mpa_2)
 
 # Summarizing the frequency of each class per polygon
@@ -47,14 +45,15 @@ summary_table_mpa <- as.data.frame(summary_table_mpa)
 #View(summary_table_mpa)
 
 #Convert to percentages
-# Group by `realm_name` and calculate the total frequency for each realm
+# Group by `Name` and calculate the total frequency for each MPA
 summary_table_mpa_df_grouped <- summary_table_mpa %>%
   group_by(Name) %>%
   mutate(total_freq = sum(Freq))
 
-# Calculate the percentage of each level within each realm
+# Calculate the percentage of each level within each MPA
 summary_table_mpa_df_grouped <- summary_table_mpa_df_grouped %>%
   mutate(percentage = (Freq / total_freq) * 100)
+# View(summary_table_mpa_df_grouped)
 
 # Print the results
 summary_table_mpa_df_grouped <- as.data.frame(summary_table_mpa_df_grouped)
@@ -65,19 +64,22 @@ summary_table_mpa_df_grouped <- as.data.frame(summary_table_mpa_df_grouped)
 # Step 1: Filter the rows where grid_float_All_2011_01_converted == "3"
 high_density_df_mpa <- summary_table_mpa_df_grouped %>%
   filter(grid_float_All_2011_01_converted == "3") %>%
-  arrange(percentage)  # Step 2: Arrange by descending percentage for "3" category
+  arrange(desc(percentage))  # Step 2: Arrange by descending percentage for "3" category
 
 # Step 3: Reorder the original data frame based on the order of realm_name in the high density subset
 summary_table_mpa_df_grouped_ordered <- summary_table_mpa_df_grouped %>%
   mutate(Name = factor(Name, levels = high_density_df_mpa$Name)) %>%
   arrange(Name, grid_float_All_2011_01_converted)
-
-# View the result
-View(summary_table_mpa_df_grouped_ordered)[1:60,]
+# View(summary_table_mpa_df_grouped_ordered)
+# names(summary_table_mpa_df_grouped_ordered)
 
 # Stacked bar plot with ggplot2
+#View(summary_table_mpa_df_grouped_ordered)
+
+png("MPA_barplot.png", width = 4000, height = 10000)
+
 ggplot(summary_table_mpa_df_grouped_ordered, aes(x = as.factor(Name), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
-  geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) +
+  geom_bar(stat = "identity", position = "stack") +
   labs(x = "Marine Protected Areas", y = "Percentage of total area", fill = "Ship density") +
   theme_minimal() +
   coord_flip() +
@@ -93,14 +95,15 @@ ggplot(summary_table_mpa_df_grouped_ordered, aes(x = as.factor(Name), y = percen
     axis.title.y = element_text(size = 14, margin = margin(r = 50))  # Increase space between y-axis title and labels
   )
 
+dev.off()
 
 ################################################################################
 #         Ecologically or Biologically Significant Areas (EBSA)
 ################################################################################
 
 ebsa <- terra::vect("shapes/Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
-plot(ebsa)
-crs(ebsa)
+#plot(ebsa)
+#crs(ebsa)
 
 # Extract raster values for each polygon
 extracted_values_ebsa <- extract(terciles_reclassified_all_summed, 
@@ -135,22 +138,30 @@ summary_table_ebsa_df_grouped <- as.data.frame(summary_table_ebsa_df_grouped)
 #View(summary_table_ebsa_df_grouped)
 
 ## Reorder the data frame, putting those with more "High density" on top 
-# Assuming your data frame is called `df`
-# Step 1: Filter the rows where grid_float_All_2011_01_converted == "3"
+
+# Step 1: Filter the rows where grid_float_All_2011_01_converted == "3" and arrange in descending order
 high_density_df_ebsa <- summary_table_ebsa_df_grouped %>%
   filter(grid_float_All_2011_01_converted == "3") %>%
-  arrange(percentage)  # Step 2: Arrange by descending percentage for "3" category
+  arrange(desc(percentage))  # Arrange by descending percentage of class 3
 
-# Step 3: Reorder the original data frame based on the order of realm_name in the high density subset
+# Step 2: Reorder the original data frame based on the ordered NAME from high_density_df_ebsa
 summary_table_ebsa_df_grouped_ordered <- summary_table_ebsa_df_grouped %>%
   mutate(NAME = factor(NAME, levels = high_density_df_ebsa$NAME)) %>%
   arrange(NAME, grid_float_All_2011_01_converted)
 
+#Clean EBSA name
+ebsa_name <- summary_table_ebsa_df_grouped_ordered$NAME
+ebsa_name <- gsub("\\?", "-", ebsa_name)  # Replace "?" with "-"
+ebsa_name <- gsub("EBSA No\\. [0-9]+: ", "", ebsa_name)  # Remove "EBSA No. [number]: "
+summary_table_ebsa_df_grouped_ordered$NAME <- ebsa_name
 # View the result
-View(summary_table_ebsa_df_grouped_ordered)[1:60,]
+# View(summary_table_ebsa_df_grouped_ordered)
 
 # Stacked bar plot with ggplot2
-ggplot(summary_table_ebsa_df_grouped_ordered, aes(x = as.factor(NAME), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
+png("EBSA_barplot.png", width = 3000, height = 5000)
+
+#ggplot(summary_table_ebsa_df_grouped_ordered, aes(x = as.factor(NAME), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
+ggplot(summary_table_ebsa_df_grouped_ordered, aes(x = NAME, y = percentage, fill = grid_float_All_2011_01_converted)) +
   geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) +
   labs(x = "Ecologically or Biologically Significant Areas", y = "Percentage of total area", fill = "Ship density") +
   theme_minimal() +
@@ -162,10 +173,16 @@ ggplot(summary_table_ebsa_df_grouped_ordered, aes(x = as.factor(NAME), y = perce
   ) +
   # Adjust theme to give more space to the left labels (realm_name)
   theme(
-    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),   # Increase left margin (last value) for more space
-    axis.text.y = element_text(size = 8, hjust = 1),  # Increase label size and align them correctly
-    axis.title.y = element_text(size = 14, margin = margin(r = 50))  # Increase space between y-axis title and labels
+    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),  # Increase left margin (last value) for more space
+    axis.text.y = element_text(size = 16, hjust = 1),  # Increase y-axis label font size
+    axis.text.x = element_text(size = 16),  # Increase x-axis label font size
+    axis.title.y = element_text(size = 16, margin = margin(r = 50)),  # Increase y-axis title font size
+    axis.title.x = element_text(size = 16),  # Increase x-axis title font size
+    legend.title = element_text(size = 16),  # Increase legend title font size
+    legend.text = element_text(size = 14)    # Increase legend text font size
   )
+
+dev.off()
 
 ################################################################################
 #                       Mapped Biogeographic Realms (MBR)
@@ -183,6 +200,7 @@ crs(marine_realms)
 # Extract raster values for each polygon
 extracted_values_MBR <- extract(terciles_reclassified_all_summed, 
                                 marine_realms)
+
 # merge two data frames by ID
 extracted_values_MBR_2 <- merge(extracted_values_MBR, as.data.frame(marine_realms), by.x = "ID", by.y = "Realm")
 
@@ -239,7 +257,6 @@ ggplot(summary_table_MBR_df_grouped_ordered, aes(x = as.factor(realm_name), y = 
     axis.text.y = element_text(size = 8, hjust = 1),  # Increase label size and align them correctly
     axis.title.y = element_text(size = 14, margin = margin(r = 50))  # Increase space between y-axis title and labels
   )
-
 
 ################################################################################
 #                       Exclusive Economic Zones (EEZ)
@@ -306,7 +323,12 @@ summary_table_eez_df_grouped_ordered <- summary_table_eez_df_grouped %>%
 #View(summary_table_MBR_df_grouped_ordered)
 
 # Stacked bar plot with ggplot2 - just the top 20 EEZ
-ggplot(summary_table_eez_df_grouped_ordered[1:60,], aes(x = as.factor(SOVEREIGN1), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
+
+# First plot
+
+png(file="eez_plot.png", width = 2500, height = 10000)
+
+ggplot(summary_table_eez_df_grouped_ordered, aes(x = as.factor(SOVEREIGN1), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
   geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) +
   labs(x = "Economic Exclusive Zones", y = "Percentage of total area", fill = "Ship density") +
   theme_minimal() +
@@ -318,11 +340,16 @@ ggplot(summary_table_eez_df_grouped_ordered[1:60,], aes(x = as.factor(SOVEREIGN1
   ) +
   # Adjust theme to give more space to the left labels (realm_name)
   theme(
-    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),   # Increase left margin (last value) for more space
-    axis.text.y = element_text(size = 8, hjust = 1),  # Increase label size and align them correctly
-    axis.title.y = element_text(size = 14, margin = margin(r = 50))  # Increase space between y-axis title and labels
+    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),  # Increase left margin (last value) for more space
+    axis.text.y = element_text(size = 16, hjust = 1),  # Increase y-axis label font size
+    axis.text.x = element_text(size = 16),  # Increase x-axis label font size
+    axis.title.y = element_text(size = 16, margin = margin(r = 50)),  # Increase y-axis title font size
+    axis.title.x = element_text(size = 16),  # Increase x-axis title font size
+    legend.title = element_text(size = 16),  # Increase legend title font size
+    legend.text = element_text(size = 14)    # Increase legend text font size
   )
 
+dev.off()
 
 ################################################################################
 #                   Marine Ecoregions of the World (MEOW)
@@ -334,7 +361,6 @@ meow <- terra::vect("shapes/meow_ecos.shp")
 plot(meow)
 crs(meow)
 View(as.data.frame(meow))
-
 
 # Extract raster values for each polygon
 extracted_values_meow <- extract(terciles_reclassified_all_summed, 
@@ -381,7 +407,9 @@ summary_table_meow_df_grouped_ordered <- summary_table_meow_df_grouped %>%
 
 # Stacked bar plot with ggplot2
 
-png(file="meow_plot.png", width = 2000, height = 2000)
+# First plot
+
+png(file="meow_plot.png", width = 2500, height = 5000)
 
 ggplot(summary_table_meow_df_grouped_ordered, aes(x = as.factor(ECOREGION), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
   geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) +
@@ -395,10 +423,13 @@ ggplot(summary_table_meow_df_grouped_ordered, aes(x = as.factor(ECOREGION), y = 
   ) +
   # Adjust theme to give more space to the left labels (realm_name)
   theme(
-    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),   # Increase left margin (last value) for more space
-    axis.text.y = element_text(size = 8, hjust = 1),  # Increase label size and align them correctly
-    axis.title.y = element_text(size = 14, margin = margin(r = 50))  # Increase space between y-axis title and labels
+    plot.margin = unit(c(1, 1, 1, 2.5), "cm"),  # Increase left margin (last value) for more space
+    axis.text.y = element_text(size = 16, hjust = 1),  # Increase y-axis label font size
+    axis.text.x = element_text(size = 16),  # Increase x-axis label font size
+    axis.title.y = element_text(size = 16, margin = margin(r = 50)),  # Increase y-axis title font size
+    axis.title.x = element_text(size = 16),  # Increase x-axis title font size
+    legend.title = element_text(size = 16),  # Increase legend title font size
+    legend.text = element_text(size = 14)    # Increase legend text font size
   )
 
 dev.off()
-
