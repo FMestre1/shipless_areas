@@ -22,7 +22,8 @@ terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishi
 #UNEP-WCMC and IUCN (2024), Protected Planet: The World Database on Protected Areas (WDPA)
 #[Online], October 2024, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
 
-mpa <- terra::vect("shapes/mpa_simplified.shp")
+#mpa <- terra::vect("shapes/mpa_simplified.shp")
+mpa <- terra::vect("shapes/MPA_merged_from_WDPA.shp")
 #plot(mpa)
 #crs(mpa)
 
@@ -38,16 +39,17 @@ colnames(mpa_df)[1] <- "ID"
 # merge two data frames by ID
 extracted_values_mpa_2 <- merge(extracted_values_mpa, mpa_df, by.x = "ID", by.y = "ID")
 #head(extracted_values_mpa_2)
+names(extracted_values_mpa_2)
 
 # Summarizing the frequency of each class per polygon
-summary_table_mpa <- table(extracted_values_mpa_2[,2:3])
+summary_table_mpa <- table(extracted_values_mpa_2[,c(2,6)])
 summary_table_mpa <- as.data.frame(summary_table_mpa)
 #View(summary_table_mpa)
 
 #Convert to percentages
 # Group by `Name` and calculate the total frequency for each MPA
 summary_table_mpa_df_grouped <- summary_table_mpa %>%
-  group_by(Name) %>%
+  group_by(NAME) %>%
   mutate(total_freq = sum(Freq))
 
 # Calculate the percentage of each level within each MPA
@@ -64,17 +66,19 @@ summary_table_mpa_df_grouped <- as.data.frame(summary_table_mpa_df_grouped)
 # Step 1: Filter the rows where grid_float_All_2011_01_converted == "3"
 high_density_df_mpa <- summary_table_mpa_df_grouped %>%
   filter(grid_float_All_2011_01_converted == "3") %>%
-  arrange(desc(percentage))  # Step 2: Arrange by descending percentage for "3" category
+  arrange(percentage)  # Step 2: Arrange by descending percentage for "3" category
 
 # Step 3: Reorder the original data frame based on the order of realm_name in the high density subset
 summary_table_mpa_df_grouped_ordered <- summary_table_mpa_df_grouped %>%
-  mutate(Name = factor(Name, levels = high_density_df_mpa$Name)) %>%
-  arrange(Name, grid_float_All_2011_01_converted)
+  mutate(Name = factor(NAME, levels = high_density_df_mpa$Name)) %>%
+  arrange(NAME, grid_float_All_2011_01_converted)
 # View(summary_table_mpa_df_grouped_ordered)
 # names(summary_table_mpa_df_grouped_ordered)
 
 # Stacked bar plot with ggplot2
 #View(summary_table_mpa_df_grouped_ordered)
+
+write.csv(summary_table_mpa_df_grouped_ordered, "summary_table_mpa_df_grouped_ordered.csv")
 
 png("MPA_barplot.png", width = 4000, height = 10000)
 
@@ -156,6 +160,8 @@ ebsa_name <- gsub("EBSA No\\. [0-9]+: ", "", ebsa_name)  # Remove "EBSA No. [num
 summary_table_ebsa_df_grouped_ordered$NAME <- ebsa_name
 # View the result
 # View(summary_table_ebsa_df_grouped_ordered)
+
+write.csv(summary_table_ebsa_df_grouped_ordered, "summary_table_ebsa_df_grouped_ordered.csv")
 
 # Stacked bar plot with ggplot2
 png("EBSA_barplot.png", width = 3000, height = 5000)
@@ -239,6 +245,8 @@ summary_table_MBR_df_grouped_ordered <- summary_table_MBR_df_grouped %>%
 
 # View the result
 #View(summary_table_MBR_df_grouped_ordered)
+
+write.csv(summary_table_MBR_df_grouped_ordered, "summary_table_MBR_df_grouped_ordered.csv")
 
 # Stacked bar plot with ggplot2
 ggplot(summary_table_MBR_df_grouped_ordered, aes(x = as.factor(realm_name), y = percentage, fill = as.factor(grid_float_All_2011_01_converted))) +
@@ -324,7 +332,7 @@ summary_table_eez_df_grouped_ordered <- summary_table_eez_df_grouped %>%
 
 # Stacked bar plot with ggplot2 - just the top 20 EEZ
 
-# First plot
+write.csv(summary_table_eez_df_grouped_ordered, "summary_table_eez_df_grouped_ordered.csv")
 
 png(file="eez_plot.png", width = 2500, height = 10000)
 
@@ -407,7 +415,7 @@ summary_table_meow_df_grouped_ordered <- summary_table_meow_df_grouped %>%
 
 # Stacked bar plot with ggplot2
 
-# First plot
+write.csv(summary_table_meow_df_grouped_ordered, "summary_table_meow_df_grouped_ordered.csv")
 
 png(file="meow_plot.png", width = 2500, height = 5000)
 
