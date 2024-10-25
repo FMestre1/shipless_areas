@@ -15,7 +15,6 @@ library(cowplot)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
-
 #### 1. Load ship density maps
 
 all_summed_resampled <- terra::rast("all_summed_resampled.tif")
@@ -44,7 +43,7 @@ fishing_summed <- terra::rast("E:/shipless_areas/fishing_summed.tif")
 cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
 testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
 pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
-#
+seabirds_sr_raster_resampled_cropped <- terra::rast("seabirds_sr_raster_resampled_cropped.tif")
 
 #Required functions
 
@@ -56,6 +55,7 @@ colmat <- function(nbreaks = 3, breakstyle = "quantile",
                    bottomleft = "#BEBEBE", bottomright = "#FFE60F",
                    xlab = "x label", ylab = "y label", plotLeg = TRUE,
                    saveLeg = FALSE) {
+  
   # Load required libraries
   library(terra)
   require(ggplot2)
@@ -131,6 +131,7 @@ colmat <- function(nbreaks = 3, breakstyle = "quantile",
   return(col.matrix)
 }
 
+####
 
 bivariate.map <- function(rasterx, rastery, colourmatrix = col.matrix,
                           export.colour.matrix = TRUE,
@@ -215,7 +216,6 @@ bivariate.map <- function(rasterx, rastery, colourmatrix = col.matrix,
 
 #Load world vector data
 world <- ne_coastline(scale = "medium", returnclass = "sf")
-
 
 ################################################################################
 ################################################################################
@@ -448,6 +448,88 @@ final_plot_pinniped_ships <- ggdraw() +
 
 # Show the final plot with a fixed legend and a title that stays visible
 final_plot_pinniped_ships
+
+################################################################################
+################################################################################
+# Seabirds
+
+# Create the colour matrix
+col.matrix31 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                      xlab = "Ship density", ylab = "Seabird richness", 
+                      bottomright = "#4885C1", upperright = "#3F2949",
+                      bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                      saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+
+ext(seabirds_sr_raster_resampled_cropped) <- ext(pinnipeds_sr_raster)
+seabirds_sr_raster_resampled_cropped_ext <- extend(seabirds_sr_raster_resampled_cropped, ext(pinnipeds_sr_raster))
+terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext, "seabirds_sr_raster_resampled_cropped_ext.tif")
+
+all_ships_vs_seabirds <- bivariate.map(rasterx = all_summed_resampled, rastery = seabirds_sr_raster_resampled_cropped_ext,
+                                        export.colour.matrix = FALSE,
+                                        colourmatrix = col.matrix31)
+
+# Convert to dataframe for plotting with ggplot
+all_ships_vs_seabirds <- setDT(as.data.frame(all_ships_vs_seabirds, xy = TRUE))
+colnames(all_ships_vs_seabirds)[3] <- "BivValue"
+all_ships_vs_seabirds_2 <- melt(all_ships_vs_seabirds, id.vars = c("x", "y"),
+                                 measure.vars = "BivValue",
+                                 value.name = "bivVal",
+                                 variable.name = "Variable")
+
+# Create the map
+map_all_ships_seabirds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = all_ships_vs_seabirds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix31, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_seabirds
+
+# Add the title directly to the main plot so it scales with zoom
+seabirds_ships_main_plot_with_title <- map_all_ships_seabirds + 
+  ggtitle("Ship density vs Sea Sea Bird Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_seabirds_ships <- ggdraw() +
+  draw_plot(seabirds_ships_main_plot_with_title) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_seabirds_ships
 
 ################################################################################
 ################################################################################
@@ -1145,5 +1227,239 @@ final_plot_pinnipeds_ships_fishing
 ################################################################################
 ################################################################################
 
+################################################################################
+################################################################################
+# Seabirds vs tankers
 
+# Create the colour matrix
+col.matrix101 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                        xlab = "Tanker density", ylab = "Seabirds richness", 
+                        bottomright = "#4885C1", upperright = "#3F2949",
+                        bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                        saveLeg = FALSE, plotLeg = TRUE)
 
+# create the bivariate raster
+tankers_vs_seabirds <- bivariate.map(rasterx = tankers_summed_resampled, rastery = seabirds_sr_raster_resampled_cropped_ext,
+                                     export.colour.matrix = FALSE,
+                                     colourmatrix = col.matrix101)
+
+# Convert to dataframe for plotting with ggplot
+tankers_vs_seabirds <- setDT(as.data.frame(tankers_vs_seabirds, xy = TRUE))
+colnames(tankers_vs_seabirds)[3] <- "BivValue"
+tankers_vs_seabirds_2 <- melt(tankers_vs_seabirds, id.vars = c("x", "y"),
+                              measure.vars = "BivValue",
+                              value.name = "bivVal",
+                              variable.name = "Variable")
+
+# Create the map
+map_all_ships_seabirds_tank <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = tankers_vs_seabirds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix101, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_all_ships_seabirds_tank
+
+# Add the title directly to the main plot so it scales with zoom
+seabirds_ships_main_plot_with_title_tank <- map_all_ships_seabirds_tank + 
+  ggtitle("Tanker density vs Seabird Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_seabirds_ships_tank <- ggdraw() +
+  draw_plot(seabirds_ships_main_plot_with_title_tank) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_seabirds_ships_tank
+
+################################################################################
+################################################################################
+# Seabirds vs cargo ships
+
+# Create the colour matrix
+col.matrix111 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                        xlab = "Cargo ships density", ylab = "Seabirds richness", 
+                        bottomright = "#4885C1", upperright = "#3F2949",
+                        bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                        saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+cargo_vs_seabirds <- bivariate.map(rasterx = cargo_summed_resampled, rastery = seabirds_sr_raster_resampled_cropped_ext,
+                                   export.colour.matrix = FALSE,
+                                   colourmatrix = col.matrix111)
+
+# Convert to dataframe for plotting with ggplot
+cargo_vs_seabirds <- setDT(as.data.frame(cargo_vs_seabirds, xy = TRUE))
+colnames(cargo_vs_seabirds)[3] <- "BivValue"
+cargo_vs_seabirds_2 <- melt(cargo_vs_seabirds, id.vars = c("x", "y"),
+                            measure.vars = "BivValue",
+                            value.name = "bivVal",
+                            variable.name = "Variable")
+
+# Create the map
+map_cargo_seabirds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = cargo_vs_seabirds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix111, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_cargo_seabirds
+
+# Add the title directly to the main plot so it scales with zoom
+seabirds_ships_main_plot_with_title_cargo <- map_cargo_seabirds + 
+  ggtitle("Cargo ship density vs Seabird Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_seabirds_ships_cargo <- ggdraw() +
+  draw_plot(seabirds_ships_main_plot_with_title_cargo) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_seabirds_ships_cargo
+
+################################################################################
+################################################################################
+# Seabirds vs fishing ships
+
+# Create the colour matrix
+col.matrix12 <- colmat(nbreaks = 3, breakstyle = "quantile",
+                       xlab = "Fishing ships density", ylab = "Seabirds richness", 
+                       bottomright = "#4885C1", upperright = "#3F2949",
+                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
+                       saveLeg = FALSE, plotLeg = TRUE)
+
+# create the bivariate raster
+fishing_vs_seabirds <- bivariate.map(rasterx = fishing_summed_resampled, rastery = seabirds_sr_raster_resampled_cropped_ext,
+                                     export.colour.matrix = FALSE,
+                                     colourmatrix = col.matrix12)
+
+# Convert to dataframe for plotting with ggplot
+fishing_vs_seabirds <- setDT(as.data.frame(fishing_vs_seabirds, xy = TRUE))
+colnames(fishing_vs_seabirds)[3] <- "BivValue"
+fishing_vs_seabirds_2 <- melt(fishing_vs_seabirds, id.vars = c("x", "y"),
+                              measure.vars = "BivValue",
+                              value.name = "bivVal",
+                              variable.name = "Variable")
+
+# Create the map
+map_fishing_seabirds <- ggplot() +  # Start with an empty ggplot
+  geom_raster(data = fishing_vs_seabirds_2, aes(x = x, y = y, fill = bivVal)) +
+  scale_fill_gradientn(colours = col.matrix12, na.value = "transparent") + 
+  # General theme adjustments
+  theme_bw() +
+  theme(text = element_text(size = 10, colour = "black")) +
+  # Add world borders using geom_sf
+  geom_sf(data = world, fill = NA, colour = "black", size = 0.4) +  # Outline continents only
+  # Use coord_sf() to keep aspect ratio and avoid cropping the map
+  coord_sf(xlim = c(-180, 180), ylim = c(-90, 90), expand = FALSE) +  # Set full limits for global view
+  # Customize legend and background
+  theme(legend.position = "none",
+        plot.background = element_blank(),
+        strip.text = element_text(size = 12, colour = "black"),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        axis.text = element_text(size = 12, colour = "black"),
+        axis.title = element_text(size = 12, colour = "black")) +
+  # Axis labels
+  labs(x = "Longitude", y = "Latitude")
+
+# Print the final map
+map_fishing_seabirds
+
+# Add the title directly to the main plot so it scales with zoom
+seabirds_ships_main_plot_with_title_fishing <- map_fishing_seabirds + 
+  ggtitle("Fishing ship density vs Seabird Richness") + 
+  theme(
+    plot.title = element_text(
+      size = 16,       # Adjust title font size
+      face = "bold",   # Bold title
+      hjust = 0.5      # Center the title
+    )
+  )
+
+# Now, use cowplot to draw the legend in a fixed position aligned with the x-axis
+final_plot_seabirds_ships_fishing <- ggdraw() +
+  draw_plot(seabirds_ships_main_plot_with_title_fishing) +  # Add the main plot with title
+  draw_plot(
+    BivLegend + theme(
+      plot.background = element_rect(fill = "white", colour = NA),  # Background for the legend
+      legend.title = element_text(size = 6),  # Adjust legend text size
+      legend.text = element_text(size = 6)
+    ), 
+    x = 0.05,  # X position (left aligned)
+    y = 0.15,  # Align the legend with the x-axis
+    width = 0.25,  # Legend width
+    height = 0.25  # Legend height
+  )
+
+# Show the final plot with a fixed legend and a title that stays visible
+final_plot_seabirds_ships_fishing
+
+################################################################################
+#                  Convert these maps to raster files
+################################################################################
+
+#to do...

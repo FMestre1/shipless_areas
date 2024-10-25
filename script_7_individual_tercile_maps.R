@@ -38,10 +38,7 @@ fishing_summed <- terra::rast("E:/shipless_areas/fishing_summed.tif")
 cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
 testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
 pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
-#
-#plot(cetaceans_sr_raster)
-#plot(testudines_sr_raster)
-#plot(pinnipeds_sr_raster)
+seabirds_sr_raster <- terra::rast("seabirds_data/n_species_all_ranges.tif")
 
 #### 3. Same resolution and extent
 
@@ -78,11 +75,26 @@ terra::res(cetaceans_sr_raster)
 #terra::res(pinnipeds_sr_raster)
 
 #
-# Resample to match the resolution of raster1
+# Resample to match the resolution and extent
 all_summed_resampled <- resample(all_summed, cetaceans_sr_raster)
 cargo_summed_resampled <- resample(cargo_summed, cetaceans_sr_raster)
 tankers_summed_resampled <- resample(tankers_summed, cetaceans_sr_raster)
 fishing_summed_resampled <- resample(fishing_summed, cetaceans_sr_raster)
+#
+seabirds_sr_raster_resampled <- resample(seabirds_sr_raster, cetaceans_sr_raster)
+#plot(seabirds_sr_raster_resampled)
+continents <- terra::vect("shapes/coastline.shp")
+#plot(continents, add=TRUE)
+
+# Crop the raster using the vector leaving out the continents 
+extent_vector <- as.polygons(ext(continents))
+#plot(extent_vector)
+oceans <- erase(extent_vector, continents)
+crs(oceans) <- crs(continents)
+#plot(oceans, add=TRUE)
+seabirds_sr_raster_resampled_cropped <- crop(seabirds_sr_raster_resampled, oceans, mask=TRUE)
+#plot(seabirds_sr_raster_resampled_cropped)
+
 #Save
 terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled.tif")
 terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif")
@@ -94,12 +106,10 @@ cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
 tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
 fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
 
-
 #terra::res(all_summed_resampled)
 #terra::res(cargo_summed_resampled)
 #terra::res(tankers_summed_resampled)
 #terra::res(fishing_summed_resampled)
-
 
 terra::global(all_summed_resampled, fun=quantile, na.rm = TRUE)
 ?terra::quantile
@@ -113,7 +123,7 @@ terciles_fishing_summed <- quantile(values(fishing_summed_resampled), probs = c(
 terciles_cetaceans_sr_raster <- quantile(values(cetaceans_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_testudines_sr_raster <- quantile(values(testudines_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_pinnipeds_sr_raster <- quantile(values(pinnipeds_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
-
+terciles_seabirds_sr_raster_resampled_cropped <- quantile(values(seabirds_sr_raster_resampled_cropped), probs = c(1/3, 2/3), na.rm = TRUE)
 
 # Classify the raster into terciles
 # Create a matrix for classification
@@ -147,11 +157,16 @@ class_matrix_testudines <- matrix(c(as.numeric(global(testudines_sr_raster, fun=
                                     terciles_testudines_sr_raster[2], as.numeric(global(testudines_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                     ncol = 3, byrow = TRUE)
 
-
 class_matrix_pinnipeds <- matrix(c(as.numeric(global(pinnipeds_sr_raster, fun=min, na.rm=TRUE)), terciles_pinnipeds_sr_raster[1], 1,  # First tercile
                                   terciles_pinnipeds_sr_raster[1], terciles_pinnipeds_sr_raster[2], 2,  # Second tercile
                                   terciles_pinnipeds_sr_raster[2], as.numeric(global(pinnipeds_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                   ncol = 3, byrow = TRUE)
+
+#AQUI
+class_matrix_seabirds <- matrix(c(as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=min, na.rm=TRUE)), terciles_seabirds_sr_raster_resampled_cropped[1], 1,  # First tercile
+                                  terciles_seabirds_sr_raster_resampled_cropped[1], terciles_seabirds_sr_raster_resampled_cropped[2], 2,  # Second tercile
+                                  terciles_seabirds_sr_raster_resampled_cropped[2], as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=max, na.rm=TRUE)), 3),  # Third tercile
+                                   ncol = 3, byrow = TRUE)
 
 
 # Apply the classification
@@ -163,6 +178,7 @@ terciles_reclassified_fishing_summed <- terra::classify(fishing_summed_resampled
 terciles_reclassified_cetaceans <- terra::classify(cetaceans_sr_raster, class_matrix_cetaceans)
 terciles_reclassified_testudines <- terra::classify(testudines_sr_raster, class_matrix_testudines)
 terciles_reclassified_pinnipeds <- terra::classify(pinnipeds_sr_raster, class_matrix_pinnipeds)
+terciles_reclassified_seabirds <- terra::classify(seabirds_sr_raster_resampled_cropped, class_matrix_seabirds)
 
 # Plot the result
 plot(terciles_reclassified_all_summed)
@@ -173,6 +189,7 @@ plot(terciles_reclassified_fishing_summed)
 plot(terciles_reclassified_cetaceans)
 plot(terciles_reclassified_testudines)
 plot(terciles_reclassified_pinnipeds)
+plot(terciles_reclassified_seabirds)
 
 #Save
 terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif", overwrite = TRUE)
@@ -183,6 +200,7 @@ terra::writeRaster(terciles_reclassified_fishing_summed, filename = "terciles_re
 terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclassified_cetaceans.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_seabirds, filename = "terciles_reclassified_seabirds.tif", overwrite = TRUE)
 
 #Load
 terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
@@ -193,3 +211,4 @@ terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishi
 terciles_reclassified_cetaceans <- terra::rast("terciles_reclassified_cetaceans.tif")
 terciles_reclassified_testudines <- terra::rast("terciles_reclassified_testudines.tif")
 terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.tif")
+terciles_reclassified_seabirds <- terra::rast("terciles_reclassified_seabirds.tif")
