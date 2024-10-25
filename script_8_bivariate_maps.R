@@ -7,7 +7,6 @@
 
 #Load packages
 library(data.table)
-library(terra)
 library(classInt)
 library(patchwork)
 library(ggplot2)
@@ -15,207 +14,24 @@ library(cowplot)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
-#### 1. Load ship density maps
+#### 1. Load ships density maps
 
-all_summed_resampled <- terra::rast("all_summed_resampled.tif")
-cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
-tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
-fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
-
-# CCMAR computer
-all_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_all/all_summed.tif")
-cargo_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
-tankers_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
-fishing_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
-
-# My disk
-all_summed <- terra::rast("E:/shipless_areas/all_summed.tif")
-cargo_summed <- terra::rast("E:/shipless_areas/cargo_summed.tif")
-tankers_summed <- terra::rast("E:/shipless_areas/tankers_summed.tif")
-fishing_summed <- terra::rast("E:/shipless_areas/fishing_summed.tif")
+#Using raster (keep compatibility with the functions)
+all_summed_resampled <- raster::raster("all_summed_resampled.tif")
+cargo_summed_resampled <- raster::raster("cargo_summed_resampled.tif")
+tankers_summed_resampled <- raster::raster("tankers_summed_resampled.tif")
+fishing_summed_resampled <- raster::raster("fishing_summed_resampled.tif")
 #
-#plot(all_summed)
-#plot(cargo_summed)
-#plot(tankers_summed)
-#plot(fishing_summed)
+cetaceans_sr_raster <- raster::raster("cetaceans_sr_raster.tif")
+testudines_sr_raster <- raster::raster("testudines_sr_raster.tif")
+pinnipeds_sr_raster <- raster::raster("pinnipeds_sr_raster.tif")
+seabirds_sr_raster_resampled_cropped_ext <- raster::raster("seabirds_sr_raster_resampled_cropped_ext.tif")
 
-#### 2. Load species richness maps
-cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
-testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
-pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
-seabirds_sr_raster_resampled_cropped <- terra::rast("seabirds_sr_raster_resampled_cropped.tif")
+#### 2. Load world vector data
+world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
 
-#Required functions
-
-#adapted from:
-#https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188#file-bivarrasterplot-r
-
-colmat <- function(nbreaks = 3, breakstyle = "quantile",
-                   upperleft = "#0096EB", upperright = "#820050", 
-                   bottomleft = "#BEBEBE", bottomright = "#FFE60F",
-                   xlab = "x label", ylab = "y label", plotLeg = TRUE,
-                   saveLeg = FALSE) {
-  
-  # Load required libraries
-  library(terra)
-  require(ggplot2)
-  require(classInt)
-  require(data.table)
-  
-  if (breakstyle == "sd") {
-    warning("SD breaks style cannot be used.\nWill not always return the correct number of breaks.\nSee classInt::classIntervals() for details.\nResetting to quantile",
-            call. = FALSE, immediate. = FALSE)
-    breakstyle <- "quantile"
-  }
-  
-  my.data <- seq(0, 1, .01)
-  my.class <- classInt::classIntervals(my.data, n = nbreaks, style = breakstyle)
-  my.pal.1 <- classInt::findColours(my.class, c(upperleft, bottomleft))
-  my.pal.2 <- classInt::findColours(my.class, c(upperright, bottomright))
-  
-  col.matrix <- matrix(nrow = 101, ncol = 101, NA)
-  
-  for (i in 1:101) {
-    my.col <- c(paste(my.pal.1[i]), paste(my.pal.2[i]))
-    col.matrix[102 - i, ] <- classInt::findColours(my.class, my.col)
-  }
-  
-  # Convert the matrix into a data.table for plotting
-  col.matrix.dt <- as.data.table(as.data.frame(col.matrix))
-  col.matrix.dt[, Y := .I]  # Create a Y column as row number
-  
-  # Melt the data.table to long format
-  col.matrix.dt <- melt(col.matrix.dt, id.vars = "Y", variable.name = "X", value.name = "HEXCode")
-  
-  # Convert X to integer by removing the "V" from the column names
-  col.matrix.dt[, X := as.integer(sub("V", "", X))]
-  
-  # Remove duplicates and reverse the Y column
-  col.matrix.dt <- col.matrix.dt[!duplicated(HEXCode)]
-  col.matrix.dt[, Y := rev(Y)]
-  
-  # Adjust X and Y for plotting
-  col.matrix.dt[, `:=`(Y = rep(1:nbreaks, each = nbreaks), X = rep(1:nbreaks, times = nbreaks))]
-  col.matrix.dt[, UID := .I]  # Create a UID column
-  
-  # Plot the legend if needed
-  if (plotLeg) {
-    p <- ggplot(col.matrix.dt, aes(X, Y, fill = HEXCode)) +
-      geom_tile() +
-      scale_fill_identity() +
-      coord_equal(expand = FALSE) +
-      theme_void() +
-      theme(aspect.ratio = 1,
-            axis.title = element_text(size = 12, colour = "black", hjust = 0.5, vjust = 1),
-            axis.title.y = element_text(angle = 90, hjust = 0.5)) +
-      xlab(bquote(.(xlab) ~  symbol("\256"))) +
-      ylab(bquote(.(ylab) ~  symbol("\256")))
-    
-    print(p)
-    assign("BivLegend", p, envir = .GlobalEnv)
-  }
-  
-  # Save the legend if required
-  if (saveLeg) {
-    ggsave(filename = "bivLegend.pdf", plot = p, device = "pdf",
-           path = "./", width = 4, height = 4, units = "in", dpi = 300)
-  }
-  
-  seqs <- seq(0, 100, length.out = nbreaks + 1)
-  seqs[1] <- 1
-  col.matrix <- col.matrix[seqs, seqs]
-  
-  attr(col.matrix, "breakstyle") <- breakstyle
-  attr(col.matrix, "nbreaks") <- nbreaks
-  
-  return(col.matrix)
-}
-
-####
-
-bivariate.map <- function(rasterx, rastery, colourmatrix = col.matrix,
-                          export.colour.matrix = TRUE,
-                          outname = paste0("colMatrix_rasValues", names(rasterx))) {
-  # Load required libraries
-  require(terra)
-  require(classInt)
-  
-  # Export colour matrix to a data.frame in the global environment if specified
-  quanx <- values(rasterx)
-  tempx <- data.frame(quanx = quanx, quantile = rep(NA, length(quanx)))
-  brks <- with(tempx, classIntervals(quanx,
-                                     n = attr(colourmatrix, "nbreaks"),
-                                     style = attr(colourmatrix, "breakstyle"))$brks)
-  
-  # Add small noise to breaks
-  brks[-1] <- brks[-1] + seq_along(brks[-1]) * .Machine$double.eps
-  r1 <- within(tempx, quantile <- cut(quanx,
-                                      breaks = brks,
-                                      labels = 2:length(brks),
-                                      include.lowest = TRUE))
-  quantr <- data.frame(r1[, 2])
-  
-  quany <- values(rastery)
-  tempy <- data.frame(quany = quany, quantile = rep(NA, length(quany)))
-  brksy <- with(tempy, classIntervals(quany,
-                                      n = attr(colourmatrix, "nbreaks"),
-                                      style = attr(colourmatrix, "breakstyle"))$brks)
-  
-  brksy[-1] <- brksy[-1] + seq_along(brksy[-1]) * .Machine$double.eps
-  r2 <- within(tempy, quantile <- cut(quany,
-                                      breaks = brksy,
-                                      labels = 2:length(brksy),
-                                      include.lowest = TRUE))
-  quantr2 <- data.frame(r2[, 2])
-  
-  as.numeric.factor <- function(x) {
-    as.numeric(levels(x))[x]
-  }
-  
-  col.matrix2 <- colourmatrix
-  cn <- unique(colourmatrix)
-  
-  for (i in 1:length(col.matrix2)) {
-    ifelse(is.na(col.matrix2[i]),
-           col.matrix2[i] <- 1, 
-           col.matrix2[i] <- which(col.matrix2[i] == cn)[1]
-    )
-  }
-  
-  # Export the colour matrix to data.frame in the global environment
-  if (export.colour.matrix) {
-    exportCols <- as.data.frame(cbind(
-      as.vector(col.matrix2), 
-      as.vector(colourmatrix), 
-      t(col2rgb(as.vector(colourmatrix)))
-    ))
-    colnames(exportCols)[1:2] <- c("rasValue", "HEX")
-    
-    # Export to the global environment
-    assign(
-      x = outname,
-      value = exportCols,
-      pos = .GlobalEnv
-    )
-  }
-  
-  cols <- numeric(length(quantr[, 1]))
-  
-  for (i in 1:length(quantr[, 1])) {
-    a <- as.numeric.factor(quantr[i, 1])
-    b <- as.numeric.factor(quantr2[i, 1])
-    cols[i] <- as.numeric(col.matrix2[b, a])
-  }
-  
-  # Create a new raster from the modified values
-  r <- rasterx
-  values(r) <- cols  # Assign new values to raster
-  
-  return(r)
-}
-
-#Load world vector data
-world <- ne_coastline(scale = "medium", returnclass = "sf")
+#### 3. Get the functions
+source("functions1.R")
 
 ################################################################################
 ################################################################################
@@ -462,9 +278,9 @@ col.matrix31 <- colmat(nbreaks = 3, breakstyle = "quantile",
 
 # create the bivariate raster
 
-ext(seabirds_sr_raster_resampled_cropped) <- ext(pinnipeds_sr_raster)
-seabirds_sr_raster_resampled_cropped_ext <- extend(seabirds_sr_raster_resampled_cropped, ext(pinnipeds_sr_raster))
-terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext, "seabirds_sr_raster_resampled_cropped_ext.tif")
+#ext(seabirds_sr_raster_resampled_cropped) <- ext(pinnipeds_sr_raster)
+#seabirds_sr_raster_resampled_cropped_ext <- extend(seabirds_sr_raster_resampled_cropped, ext(pinnipeds_sr_raster))
+#terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext, "seabirds_sr_raster_resampled_cropped_ext.tif")
 
 all_ships_vs_seabirds <- bivariate.map(rasterx = all_summed_resampled, rastery = seabirds_sr_raster_resampled_cropped_ext,
                                         export.colour.matrix = FALSE,
@@ -504,7 +320,7 @@ map_all_ships_seabirds
 
 # Add the title directly to the main plot so it scales with zoom
 seabirds_ships_main_plot_with_title <- map_all_ships_seabirds + 
-  ggtitle("Ship density vs Sea Sea Bird Richness") + 
+  ggtitle("Ship density vs Seabird Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -614,7 +430,7 @@ final_plot_cet_ships_tank
 
 # Create the colour matrix
 col.matrix5 <- colmat(nbreaks = 3, breakstyle = "quantile",
-                      xlab = "Cargo ship density", ylab = "Cetacean richness", 
+                      xlab = "Cargo ships density", ylab = "Cetacean richness", 
                       bottomright = "#4885C1", upperright = "#3F2949",
                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
                       saveLeg = FALSE, plotLeg = TRUE)
@@ -691,7 +507,7 @@ final_plot_cet_ships_cargo
 
 # Create the colour matrix
 col.matrix6 <- colmat(nbreaks = 3, breakstyle = "quantile",
-                      xlab = "Fishing ship density", ylab = "Cetacean richness", 
+                      xlab = "Fishing ships density", ylab = "Cetacean richness", 
                       bottomright = "#4885C1", upperright = "#3F2949",
                       bottomleft = "#CABED0", upperleft = "#AE3A4E",
                       saveLeg = FALSE, plotLeg = TRUE)
@@ -889,7 +705,7 @@ map_cargo_turtles
 
 # Add the title directly to the main plot so it scales with zoom
 turtles_ships_main_plot_with_title_cargo <- map_cargo_turtles + 
-  ggtitle("Cargo ship density vs Sea turtle Richness") + 
+  ggtitle("Cargo ships density vs Sea turtle Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -966,7 +782,7 @@ map_fishing_turtles
 
 # Add the title directly to the main plot so it scales with zoom
 turtles_ships_main_plot_with_title_fishing <- map_fishing_turtles + 
-  ggtitle("Fishing ship density vs Sea turtle Richness") + 
+  ggtitle("Fishing ships density vs Sea turtle Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -1120,7 +936,7 @@ map_cargo_pinnipeds
 
 # Add the title directly to the main plot so it scales with zoom
 pinnipeds_ships_main_plot_with_title_cargo <- map_cargo_pinnipeds + 
-  ggtitle("Cargo ship density vs Pinniped Richness") + 
+  ggtitle("Cargo ships density vs Pinniped Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -1197,7 +1013,7 @@ map_fishing_pinnipeds
 
 # Add the title directly to the main plot so it scales with zoom
 pinnipeds_ships_main_plot_with_title_fishing <- map_fishing_pinnipeds + 
-  ggtitle("Fishing ship density vs Pinniped Richness") + 
+  ggtitle("Fishing ships density vs Pinniped Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -1354,7 +1170,7 @@ map_cargo_seabirds
 
 # Add the title directly to the main plot so it scales with zoom
 seabirds_ships_main_plot_with_title_cargo <- map_cargo_seabirds + 
-  ggtitle("Cargo ship density vs Seabird Richness") + 
+  ggtitle("Cargo ships density vs Seabird Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -1431,7 +1247,7 @@ map_fishing_seabirds
 
 # Add the title directly to the main plot so it scales with zoom
 seabirds_ships_main_plot_with_title_fishing <- map_fishing_seabirds + 
-  ggtitle("Fishing ship density vs Seabird Richness") + 
+  ggtitle("Fishing ships density vs Seabird Richness") + 
   theme(
     plot.title = element_text(
       size = 16,       # Adjust title font size
@@ -1457,9 +1273,3 @@ final_plot_seabirds_ships_fishing <- ggdraw() +
 
 # Show the final plot with a fixed legend and a title that stays visible
 final_plot_seabirds_ships_fishing
-
-################################################################################
-#                  Convert these maps to raster files
-################################################################################
-
-#to do...
