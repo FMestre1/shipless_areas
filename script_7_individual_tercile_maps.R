@@ -191,6 +191,45 @@ plot(terciles_reclassified_testudines)
 plot(terciles_reclassified_pinnipeds)
 plot(terciles_reclassified_seabirds)
 
+################################################################################
+
+# Plot
+tiff("terciles_reclassified_all_summed_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_all_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
+dev.off()
+
+tiff("terciles_reclassified_cargo_summed_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_cargo_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
+dev.off()
+
+tiff("terciles_reclassified_tankers_summed_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_tankers_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
+dev.off()
+
+tiff("terciles_reclassified_fishing_summed_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_fishing_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
+dev.off()
+
+####
+
+tiff("terciles_reclassified_cetaceans_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_cetaceans, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
+dev.off()
+
+tiff("terciles_reclassified_testudines_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_testudines, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
+dev.off()
+
+tiff("terciles_reclassified_pinnipeds_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_pinnipeds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
+dev.off()
+
+tiff("terciles_reclassified_seabirds_05NOV24.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_seabirds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
+dev.off()
+
+################################################################################
+
 #Save
 terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_cargo_summed, filename = "terciles_reclassified_cargo_summed.tif", overwrite = TRUE)
