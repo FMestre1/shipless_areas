@@ -130,8 +130,3 @@ ggplot(percentage_in_out_MPA, aes(fill=MPA, y=percentage, x=ship_density)) +
   scale_x_discrete(labels = c("Low (first tercile)", "Medium (second tercile)", "High (third tercile)")) +
   scale_fill_manual(values = c("inside" = "blue", "outside" = "red"))
 
-
-
-
-
-
