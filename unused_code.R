@@ -19,3 +19,82 @@
 #plot(summed)
 
 
+
+################################################################################
+#       % Of each ship density tercile density inside and outside MPA
+################################################################################
+
+#18-11-2024
+
+#Load libraries
+library(terra)
+library(ggplot2)
+
+#Inside MPA
+inside_MPA <- as.vector(terra::values(terra::rast("D:/shipless_areas_paper/density_within_MPA.tif")))
+inside_MPA <- inside_MPA[!is.na(inside_MPA)]
+inside_MPA_counts <- as.data.frame(table(inside_MPA))
+
+#Outside MPA
+outside_MPA <- as.vector(terra::values(terra::rast("D:/shipless_areas_paper/density_outside_MPA.tif")))
+outside_MPA <- outside_MPA[!is.na(outside_MPA)]
+outside_MPA_counts <- as.data.frame(table(outside_MPA))
+
+
+inside_MPA_counts_2 <- data.frame(inside_MPA_counts, (inside_MPA_counts$Freq * 100)/sum(inside_MPA_counts$Freq), "inside")
+names(inside_MPA_counts_2)[4] <- "MPA"
+names(inside_MPA_counts_2)[3] <- "percentage"
+names(inside_MPA_counts_2)[1] <- "ship_density"
+#
+outside_MPA_counts_2 <- data.frame(outside_MPA_counts, (outside_MPA_counts$Freq * 100)/sum(outside_MPA_counts$Freq), "outside")
+names(outside_MPA_counts_2)[4] <- "MPA"
+names(outside_MPA_counts_2)[3] <- "percentage"
+names(outside_MPA_counts_2)[1] <- "ship_density"
+
+#data frame to plot
+percentage_in_out_MPA <- rbind(inside_MPA_counts_2, outside_MPA_counts_2)
+percentage_in_out_MPA$percentage <- round(percentage_in_out_MPA$percentage, 2)
+
+#Bar Plot - fig 7
+ggplot(percentage_in_out_MPA, aes(fill=MPA, y=percentage, x=ship_density)) + 
+  geom_bar(position="dodge", stat="identity") +
+  labs(x = "Ship Density", y = "Percentage", fill = "MPA") +
+  geom_text(aes(label = paste0(percentage, "%")), position = position_dodge(width = 1), vjust = -0.5) +
+  scale_x_discrete(labels = c("Low (first tercile)", "Medium (second tercile)", "High (third tercile)")) +
+  scale_fill_manual(values = c("inside" = "darkolivegreen4", "outside" = "darkorange3"))
+
+
+
+#######
+
+#Beanplot with actual density
+library(beanplot)
+
+#Inside MPA
+inside_MPA_values <- as.vector(terra::values(terra::rast("D:/shipless_areas_paper/density_within_MPA_VALUES.tif")))
+inside_MPA_values <- inside_MPA_values[!is.na(inside_MPA_values)]
+#Outside MPA
+outside_MPA_values <- as.vector(terra::values(terra::rast("D:/shipless_areas_paper/density_outside_MPA_VALUES.tif")))
+outside_MPA_values <- outside_MPA_values[!is.na(outside_MPA_values)]
+
+df_in <- data.frame(inside_MPA_values, rep("in", length(inside_MPA_values)))
+df_out <- data.frame(outside_MPA_values, rep("out", length(outside_MPA_values)))
+
+names(df_in) <- c("density","mpa")
+names(df_out) <- c("density","mpa")
+
+df_in_out_mpa <- rbind(df_in, df_out)
+str(df_in_out_mpa)
+
+df_in_out_mpa$mpa <- as.factor(df_in_out_mpa$mpa)
+
+
+?beanplot::beanplot()
+
+beanplot(density ~ mpa, data = df_in_out_mpa, col = "lightgray", border = "grey", cutmin = 0)
+
+################3
+
+#Violin plot
+ggplot(df_in_out_mpa, aes(x=mpa, y=density)) + 
+  geom_violin()
