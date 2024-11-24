@@ -227,3 +227,46 @@ tankers_vs_seabirds_RASTER <- terra::rasterize(tankers_vs_seabirds_vect,
 #Save
 terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "tankers_vs_seabirds_BIVARIATE.tif")
 
+################################################################################
+#                                 Overall Map
+################################################################################
+
+
+library(terra)
+
+all_ships_vs_cetaceans_RASTER <- terra::rast("all_ships_vs_cetaceans_BIVARIATE.tif")
+all_ships_vs_turtles_RASTER <- terra::rast("all_ships_vs_turtles_BIVARIATE.tif")
+all_ships_vs_pinnipeds_RASTER <- terra::rast("all_ships_vs_pinnipeds_BIVARIATE.tif")
+all_ships_vs_seabirds_RASTER <- terra::rast("all_ships_vs_seabirds_BIVARIATE.tif")
+
+#Define NA as zero
+all_ships_vs_cetaceans_RASTER[is.na(all_ships_vs_cetaceans_RASTER[])] <- 0 
+all_ships_vs_turtles_RASTER[is.na(all_ships_vs_turtles_RASTER[])] <- 0 
+all_ships_vs_pinnipeds_RASTER[is.na(all_ships_vs_pinnipeds_RASTER[])] <- 0 
+all_ships_vs_seabirds_RASTER[is.na(all_ships_vs_seabirds_RASTER[])] <- 0 
+
+plot(all_ships_vs_cetaceans_RASTER)
+plot(all_ships_vs_turtles_RASTER)
+plot(all_ships_vs_pinnipeds_RASTER)
+plot(all_ships_vs_seabirds_RASTER)
+
+all_hotspots <- all_ships_vs_cetaceans_RASTER +
+                all_ships_vs_turtles_RASTER +
+                all_ships_vs_pinnipeds_RASTER +
+                all_ships_vs_seabirds_RASTER
+
+plot(all_hotspots)
+terra::writeRaster(all_hotspots, filename = "all_hotspots_RASTER.tif")
+
+#Make plot
+world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
+world <- terra::vect(world)
+
+plot(all_hotspots)
+plot(world, add=TRUE)
+
+
+
+tiff("all_hotspots.tif", width=5000, height=2900, res=300)
+plot(all_hotspots, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
+dev.off()

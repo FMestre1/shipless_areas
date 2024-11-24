@@ -162,7 +162,6 @@ class_matrix_pinnipeds <- matrix(c(as.numeric(global(pinnipeds_sr_raster, fun=mi
                                   terciles_pinnipeds_sr_raster[2], as.numeric(global(pinnipeds_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                   ncol = 3, byrow = TRUE)
 
-#AQUI
 class_matrix_seabirds <- matrix(c(as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=min, na.rm=TRUE)), terciles_seabirds_sr_raster_resampled_cropped[1], 1,  # First tercile
                                   terciles_seabirds_sr_raster_resampled_cropped[1], terciles_seabirds_sr_raster_resampled_cropped[2], 2,  # Second tercile
                                   terciles_seabirds_sr_raster_resampled_cropped[2], as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=max, na.rm=TRUE)), 3),  # Third tercile
