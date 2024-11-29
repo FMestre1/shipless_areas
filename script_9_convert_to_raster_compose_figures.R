@@ -270,3 +270,54 @@ plot(world, add=TRUE)
 tiff("all_hotspots.tif", width=5000, height=2900, res=300)
 plot(all_hotspots, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
+
+
+################################################################################
+#                          MAP OF OVERALL RISKS
+################################################################################
+
+#FMestre
+#29-11-2024
+
+#Load package
+library(terra)
+
+#Load species richness maps
+cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
+testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
+pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
+seabirds_sr_raster_resampled_cropped_ext <- terra::rast("seabirds_sr_raster_resampled_cropped_ext.tif")
+all_summed_resampled <- terra::rast("all_summed_resampled.tif")
+all_summed_resampled_log <- log10(all_summed_resampled) #Log transform
+
+#Convert NA to 0
+cetaceans_sr_raster[is.na(cetaceans_sr_raster[])] <- 0 
+testudines_sr_raster[is.na(testudines_sr_raster[])] <- 0 
+pinnipeds_sr_raster[is.na(pinnipeds_sr_raster[])] <- 0 
+seabirds_sr_raster_resampled_cropped_ext[is.na(seabirds_sr_raster_resampled_cropped_ext[])] <- 0 
+
+#Rescale all maps (0-1)
+cetaceans_sr_raster_standardized <- cetaceans_sr_raster/43
+testudines_sr_raster_standardized <- testudines_sr_raster/6
+pinnipeds_sr_raster_standardized <- pinnipeds_sr_raster/10
+seabirds_sr_raster_resampled_cropped_ext_standardized <- seabirds_sr_raster_resampled_cropped_ext/69
+all_summed__standardized <- (all_summed_resampled_log - terra::minmax(all_summed_resampled_log)[1]) / (terra::minmax(all_summed_resampled_log)[2] - terra::minmax(all_summed_resampled_log)[1])
+
+#Combine biodiversity and ships
+ships_cetaceans_sr_raster <- all_summed__standardized * cetaceans_sr_raster_standardized
+ships_testudines_sr_raster <- all_summed__standardized * testudines_sr_raster_standardized
+ships_pinnipeds_sr_raster <- all_summed__standardized * pinnipeds_sr_raster_standardized
+ships_seabirds_sr_raster <- all_summed__standardized * seabirds_sr_raster_resampled_cropped_ext_standardized
+
+
+#Overall
+overall_conflict <- ships_cetaceans_sr_raster + 
+  ships_testudines_sr_raster + 
+  ships_pinnipeds_sr_raster + 
+  ships_seabirds_sr_raster
+
+overall_conflict_standardized <- overall_conflict/terra::minmax(overall_conflict)[2]
+plot(overall_conflict_standardized)
+
+#Save it...
+terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized.tif")
