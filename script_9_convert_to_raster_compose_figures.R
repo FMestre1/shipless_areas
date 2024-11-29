@@ -321,3 +321,85 @@ plot(overall_conflict_standardized)
 
 #Save it...
 terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized.tif")
+
+################################################################################
+#                                 Four axis map
+################################################################################
+
+#FMestre
+#29-11-2024
+
+
+#Load package
+library(terra)
+library(exactextractr)
+
+
+#Create table with percentage of area occupied by high ship density and 
+#percentage of area with high biodiversity value
+
+
+#Load species richness maps
+cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
+testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
+pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
+seabirds_sr_raster_resampled_cropped_ext <- terra::rast("seabirds_sr_raster_resampled_cropped_ext.tif")
+
+#Convert NA to 0
+cetaceans_sr_raster[is.na(cetaceans_sr_raster[])] <- 0 
+testudines_sr_raster[is.na(testudines_sr_raster[])] <- 0 
+pinnipeds_sr_raster[is.na(pinnipeds_sr_raster[])] <- 0 
+seabirds_sr_raster_resampled_cropped_ext[is.na(seabirds_sr_raster_resampled_cropped_ext[])] <- 0 
+biodiv <- cetaceans_sr_raster + testudines_sr_raster + pinnipeds_sr_raster + seabirds_sr_raster_resampled_cropped_ext
+
+all_summed_resampled <- terra::rast("all_summed_resampled.tif")
+
+
+#Reclassify biodiversity and ships with quartiles
+#Isolate >75%
+
+quartiles_ships <- quantile(values(all_summed_resampled), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
+quartiles_biodiversity <- quantile(values(biodiv), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
+
+
+
+class_matrix_all_ships <- matrix(c(0, quartiles_ships[1], 1,  # First quartile
+                                   quartiles_ships[1], quartiles_ships[2], 2,  # Second quartile
+                                   quartiles_ships[2], quartiles_ships[3], 3,  # Third quartile
+                                   quartiles_ships[3], as.numeric(global(all_summed_resampled, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
+                                   ncol = 3, byrow = TRUE)
+
+
+class_matrix_bidiversity <- matrix(c(-1, quartiles_biodiversity[1], 1,  # First quartile
+                                     quartiles_biodiversity[1], quartiles_biodiversity[2], 2,  # Second quartile
+                                     quartiles_biodiversity[2], quartiles_biodiversity[3], 3,  # Third quartile
+                                     quartiles_biodiversity[3], as.numeric(global(biodiv, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
+                                     ncol = 3, byrow = TRUE)
+
+
+quartiles_reclassified_ships <- terra::classify(all_summed_resampled, class_matrix_all_ships)
+quartiles_reclassified_biodiversity <- terra::classify(biodiv, class_matrix_bidiversity)
+
+terra::writeRaster(quartiles_reclassified_ships, "quartiles_reclassified_ships.tif")
+terra::writeRaster(quartiles_reclassified_biodiversity, "quartiles_reclassified_biodiversity.tif")
+
+#Extract per EEZ
+eez <- terra::vect("eez.shp")
+#eez <- terra::vect("teste.shp")
+eez_grouped <- aggregate(eez, by = "SOVEREIGN1")
+eez_grouped_sf <- sf::st_as_sf(eez_grouped)
+
+fraction_ships <- exactextractr::exact_extract(quartiles_reclassified_ships, eez_grouped_sf, "frac", progress = TRUE)
+fraction_biodiv <- exactextractr::exact_extract(quartiles_reclassified_biodiversity, eez_grouped_sf, "frac", progress = TRUE)
+
+names(fraction_ships) <- paste0("ships_", names(fraction_ships))
+names(fraction_biodiv) <- paste0("biodiv_", names(fraction_biodiv))
+
+eez_grouped_df <- data.frame(eez_grouped)
+
+data_for_plot <- data.frame(eez_grouped_df[,1], fraction_biodiv, fraction_ships)
+View(data_for_plot)
+
+#Save
+write.csv(data_for_plot, "data_for_plot.csv")
+#data_for_plot <- read.csv("data_for_plot.csv")
