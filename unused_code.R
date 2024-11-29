@@ -146,41 +146,10 @@ terra::coor
 
 sites.sp <- SpatialPoints(terra::crds(large_ports))
 
-par(mar=c(2,2,1,2))
-AtoB <- gdistance::shortestPath(x=tr.cost1, 
-                                origin=sites.sp[1,], 
-                                goal=sites.sp[2,], 
-                                output="SpatialLines")
-
-
-raster::plot(biodiversity)
-lines(AtoB, col="red", lwd=2)
-points(sites.sp[1:2,])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Neighbours <- spdep::tri2nb(sites.sp@coords)
 
 
-#plot(Neighbours, sites.sp@coords, col="darkgrey", add=TRUE)
+plot(Neighbours, sites.sp@coords, col="darkgrey", add=TRUE)
 for(i in 1:length(Neighbours))
 {
   for(j in Neighbours[[i]][Neighbours[[i]] > i])
