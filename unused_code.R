@@ -98,3 +98,104 @@ beanplot(density ~ mpa, data = df_in_out_mpa, col = "lightgray", border = "grey"
 #Violin plot
 ggplot(df_in_out_mpa, aes(x=mpa, y=density)) + 
   geom_violin()
+
+
+################################################################################
+
+
+library(terra)
+library(gdistance)
+
+large_ports <- terra::vect("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gis/world_port_index/large_ports.shp")
+
+continents <- terra::vect("C:/Users/mestr/Documents/shape/ne_110m_admin_0_countries.shp")
+plot(continents)
+plot(large_ports, add=TRUE)
+
+hotspots <- terra::rast("all_hotspots_RASTER.tif")
+plot(hotspots)
+
+#Load rasters
+pinnipeds <- terra::rast("~/0. Artigos/shipless_areas/gis/tercile/terciles_reclassified_pinnipeds.tif")
+cetaceans <- terra::rast("~/0. Artigos/shipless_areas/gis/tercile/terciles_reclassified_cetaceans.tif")
+seabirds <- terra::rast("terciles_reclassified_seabirds.tif")
+turtles <- terra::rast("~/0. Artigos/shipless_areas/gis/tercile/terciles_reclassified_testudines.tif")
+
+#Define NA as zero
+pinnipeds[is.na(pinnipeds[])] <- 0 
+cetaceans[is.na(cetaceans[])] <- 0 
+seabirds[is.na(seabirds[])] <- 0 
+turtles[is.na(turtles[])] <- 0 
+#Extent and resolution in the seabirds maps
+terra::ext(seabirds) <- terra::ext(turtles)
+seabirds <- resample(seabirds, turtles)
+
+#Sum biodiversity maps 
+biodiversity <- pinnipeds + cetaceans + seabirds + turtles
+plot(biodiversity)
+
+#Save
+terra::writeRaster(biodiversity, "sum_tercile_biodiversity.tif", overwrite=TRUE)
+
+
+tr.cost1 <- gdistance::transition(raster::raster(biodiversity), transitionFunction=mean, directions=8) 
+tr.cost1
+
+
+terra::coor
+
+sites.sp <- SpatialPoints(terra::crds(large_ports))
+
+par(mar=c(2,2,1,2))
+AtoB <- gdistance::shortestPath(x=tr.cost1, 
+                                origin=sites.sp[1,], 
+                                goal=sites.sp[2,], 
+                                output="SpatialLines")
+
+
+raster::plot(biodiversity)
+lines(AtoB, col="red", lwd=2)
+points(sites.sp[1:2,])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Neighbours <- spdep::tri2nb(sites.sp@coords)
+
+
+#plot(Neighbours, sites.sp@coords, col="darkgrey", add=TRUE)
+for(i in 1:length(Neighbours))
+{
+  for(j in Neighbours[[i]][Neighbours[[i]] > i])
+  {
+    AtoB <- gdistance::shortestPath(tr.cost1, origin=sites.sp[i,], 
+                                    goal=sites.sp[j,], output="SpatialLines")
+    lines(AtoB, col="red", lwd=1.5)
+  }
+}
+
+
+plot(AtoB, sites.sp@coords, col="darkgrey", add=TRUE)
+
+
+
+
+
+
