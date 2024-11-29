@@ -333,6 +333,7 @@ terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized
 #Load package
 library(terra)
 library(exactextractr)
+library(ggplot2)
 
 
 #Create table with percentage of area occupied by high ship density and 
@@ -360,8 +361,6 @@ all_summed_resampled <- terra::rast("all_summed_resampled.tif")
 
 quartiles_ships <- quantile(values(all_summed_resampled), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
 quartiles_biodiversity <- quantile(values(biodiv), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
-
-
 
 class_matrix_all_ships <- matrix(c(0, quartiles_ships[1], 1,  # First quartile
                                    quartiles_ships[1], quartiles_ships[2], 2,  # Second quartile
@@ -395,11 +394,22 @@ fraction_biodiv <- exactextractr::exact_extract(quartiles_reclassified_biodivers
 names(fraction_ships) <- paste0("ships_", names(fraction_ships))
 names(fraction_biodiv) <- paste0("biodiv_", names(fraction_biodiv))
 
-eez_grouped_df <- data.frame(eez_grouped)
-
 data_for_plot <- data.frame(eez_grouped_df[,1], fraction_biodiv, fraction_ships)
+eez_grouped_df <- data.frame(eez_grouped)
+data_for_plot <- data.frame(eez_grouped_df[,1],data_for_plot[,-1]*100)
+names(data_for_plot)[1] <- "country"
+
 View(data_for_plot)
 
 #Save
 write.csv(data_for_plot, "data_for_plot.csv")
 #data_for_plot <- read.csv("data_for_plot.csv")
+
+#Plot
+ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = country)) +
+  geom_point(size = 3, color = "darkblue") +
+  geom_hline(yintercept = 50, linetype = "dashed") +
+  geom_vline(xintercept = 50, linetype = "dashed") +
+  labs(x = "Ship Density", y = "Biodiversity") +
+  geom_text(hjust = 0, vjust = 0, size = 3) +  # Add labels
+  theme_minimal()
