@@ -319,8 +319,12 @@ overall_conflict <- ships_cetaceans_sr_raster +
 overall_conflict_standardized <- overall_conflict/terra::minmax(overall_conflict)[2]
 plot(overall_conflict_standardized)
 
+
+overall_conflict_standardized[is.na(overall_conflict_standardized[])] <- 0 
+
 #Save it...
-terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized.tif")
+terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized2.tif", overwrite=TRUE)
+overall_conflict_standardized  <- terra::rast("overall_conflict_standardized.tif")
 
 ################################################################################
 #                                 Four axis map
@@ -329,16 +333,13 @@ terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized
 #FMestre
 #29-11-2024
 
-
 #Load package
 library(terra)
 library(exactextractr)
 library(ggplot2)
 
-
 #Create table with percentage of area occupied by high ship density and 
 #percentage of area with high biodiversity value
-
 
 #Load species richness maps
 cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")

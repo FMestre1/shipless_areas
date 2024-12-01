@@ -107,6 +107,7 @@ final_plot_cet_ships <- ggdraw() +
     height = 0.25  # Legend height
   )
 
+
 # Show the final plot with a fixed legend and a title that stays visible
 tiff("all_ships_cetacean_05NOV24.tif", width=5000, height=2900, res=300)
 final_plot_cet_ships
