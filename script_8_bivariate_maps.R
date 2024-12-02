@@ -44,6 +44,12 @@ col.matrix <- colmat(nbreaks = 3, breakstyle = "quantile",
                      bottomleft = "#c3b3d8", upperleft = "#240d5e",
                      saveLeg = FALSE, plotLeg = TRUE)
 
+#[,1]      [,2]      [,3]      [,4]     
+#[1,] "#C3B3D8" "#C3B3D8" "#E1BFAC" "#FFCC80"
+#[2,] "#C3B3D8" "#C3B3D8" "#E1BFAC" "#FFCC80"
+#[3,] "#735F9B" "#735F9B" "#A6626D" "#D96640"
+#[4,] "#240D5E" "#240D5E" "#6B062F" "#B30000"
+
 # create the bivariate raster
 all_ships_vs_cetaceans <- bivariate.map(rasterx = all_summed_resampled, rastery = cetaceans_sr_raster,
                                         export.colour.matrix = FALSE,

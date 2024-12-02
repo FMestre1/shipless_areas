@@ -396,17 +396,35 @@ names(data_for_plot)[1] <- "country"
 
 View(data_for_plot)
 
+
+#Removing "Azerbaijan", "Kazakhstan", "Turkmenistan"
+data_for_plot <- data_for_plot[-c(7, 72, 146),]
+
 #Save
 write.csv(data_for_plot, "data_for_plot_02DEZ.csv")
 #data_for_plot <- read.csv("data_for_plot_02DEZ.csv")
 
 #Plot
 png(file="four_axis_plot2.png", width=800, height=800)
-ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = country)) +
+ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = X)) +
   geom_point(size = 3, color = "darkblue") +
   geom_hline(yintercept = 50, linetype = "dashed") +
   geom_vline(xintercept = 50, linetype = "dashed") +
   labs(x = "Ship Density", y = "Biodiversity") +
-  #geom_text(hjust = 1, vjust = 0, size = 5) +  # Add labels
+  geom_text(hjust = 1.5, vjust = 0, size = 3) +  # Add labels
+  theme_minimal()
+dev.off()
+
+################################################################################
+
+library(ggrepel)
+
+png(file="four_axis_plot3.png", width=800, height=800)
+ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = X)) +
+  geom_point(size = 3, color = "darkblue") +
+  geom_hline(yintercept = 50, linetype = "dashed") +
+  geom_vline(xintercept = 50, linetype = "dashed") +
+  labs(x = "Ship Density", y = "Biodiversity") +
+  geom_text_repel(hjust = 1.5, vjust = 0, size = 3, max.overlaps = Inf) +  # Add labels using ggrepel
   theme_minimal()
 dev.off()
