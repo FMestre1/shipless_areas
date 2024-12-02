@@ -14,77 +14,7 @@ library(cowplot)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
-#### 1. Load ships density maps
-
-#Using raster (keep compatibility with the functions)
-all_summed_resampled <- terra::rast("all_summed_resampled.tif")
-cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
-tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
-fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
-#
-cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
-testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
-pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
-seabirds_sr_raster_resampled_cropped_ext <- terra::rast("seabirds_sr_raster_resampled_cropped_ext.tif")
-
-#COnver to NA to 0
-all_summed_resampled[is.na(all_summed_resampled[])] <- 0 
-cargo_summed_resampled[is.na(cargo_summed_resampled[])] <- 0 
-tankers_summed_resampled[is.na(tankers_summed_resampled[])] <- 0 
-fishing_summed_resampled[is.na(fishing_summed_resampled[])] <- 0 
-
-cetaceans_sr_raster[is.na(cetaceans_sr_raster[])] <- 0 
-testudines_sr_raster[is.na(testudines_sr_raster)] <- 0 
-pinnipeds_sr_raster[is.na(pinnipeds_sr_raster[])] <- 0
-seabirds_sr_raster_resampled_cropped_ext[is.na(seabirds_sr_raster_resampled_cropped_ext[])] <- 0
-
-#Convert under vector to NA
-continents <- terra::vect("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gis/continents_close_seas.shp")
-plot(continents)
-
-# Create a mask using the vector
-all_summed_resampled_mask <- terra::mask(all_summed_resampled, continents)
-cargo_summed_resampled_mask <- terra::mask(cargo_summed_resampled, continents)
-tankers_summed_resampled_mask <- terra::mask(tankers_summed_resampled, continents)
-fishing_summed_resampled_mask <- terra::mask(fishing_summed_resampled, continents)
-
-cetaceans_sr_mask <- terra::mask(cetaceans_sr_raster, continents)
-testudines_sr_raster_mask <- terra::mask(testudines_sr_raster, continents)
-pinnipeds_sr_raster_mask <- terra::mask(pinnipeds_sr_raster, continents)
-seabirds_sr_raster_resampled_cropped_ext_mask <- terra::mask(seabirds_sr_raster_resampled_cropped_ext, continents)
-
-# Convert all values to NA outside the mask
-all_summed_resampled[!is.na(all_summed_resampled_mask)] <- NA
-cargo_summed_resampled[!is.na(cargo_summed_resampled_mask)] <- NA
-tankers_summed_resampled[!is.na(tankers_summed_resampled_mask)] <- NA
-fishing_summed_resampled[!is.na(fishing_summed_resampled_mask)] <- NA
-
-cetaceans_sr_raster[!is.na(cetaceans_sr_mask)] <- NA
-testudines_sr_raster[!is.na(testudines_sr_raster_mask)] <- NA
-pinnipeds_sr_raster[!is.na(pinnipeds_sr_raster_mask)] <- NA
-seabirds_sr_raster_resampled_cropped_ext[!is.na(seabirds_sr_raster_resampled_cropped_ext_mask)] <- NA
-
-### SAVE
-terra::writeRaster(all_summed_resampled,"final_rasters/all_summed_resampled_NA.tif")
-terra::writeRaster(cargo_summed_resampled,"final_rasters/cargo_summed_resampled_NA.tif")
-terra::writeRaster(tankers_summed_resampled,"final_rasters/tankers_summed_resampled_NA.tif")
-terra::writeRaster(fishing_summed_resampled,"final_rasters/fishing_summed_resampled_NA.tif")
-
-terra::writeRaster(cetaceans_sr_raster,"final_rasters/cetaceans_sr_raster_NA.tif")
-terra::writeRaster(testudines_sr_raster,"final_rasters/testudines_sr_raster_NA.tif")
-terra::writeRaster(pinnipeds_sr_raster,"final_rasters/pinnipeds_sr_raster_NA.tif")
-terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext,"final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
-
-#### 2. Load world vector data
-world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
-
-#### 3. Get the functions
-source("functions1.R")
-
-################################################################################
-# Cetaceans
-################################################################################
-
+#### 1. Load raster data
 #Have to be loaded as rasters of the raster package
 all_summed_resampled <- raster::raster("final_rasters/all_summed_resampled_NA.tif")
 cargo_summed_resampled <- raster::raster("final_rasters/cargo_summed_resampled_NA.tif")
@@ -95,6 +25,17 @@ cetaceans_sr_raster <- raster::raster("final_rasters/cetaceans_sr_raster_NA.tif"
 testudines_sr_raster <- raster::raster("final_rasters/testudines_sr_raster_NA.tif")
 pinnipeds_sr_raster <- raster::raster("final_rasters/pinnipeds_sr_raster_NA.tif")
 seabirds_sr_raster_resampled_cropped_ext <- raster::raster("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
+
+
+#### 2. Load world vector data
+world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
+
+#### 3. Get the functions
+source("functions1.R")
+
+################################################################################
+# Cetaceans
+################################################################################
 
 # Create the colour matrix
 col.matrix <- colmat(nbreaks = 3, breakstyle = "quantile",

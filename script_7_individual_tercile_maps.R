@@ -5,114 +5,20 @@
 #FMestre
 #18-09-2024
 
-#https://timogrossenbacher.ch/bivariate-maps-with-ggplot2-and-sf/
-#https://cran.r-project.org/web/packages/biscale/vignettes/biscale.html
-
-#WD
-setwd("/home/fredmestre/shipless_areas2")
-
 #Load library
 library(biscale)
 library(terra)
 
-#### 1. Load ship density maps
+all_summed_resampled <- terra::rast("final_rasters/all_summed_resampled_NA.tif")
+cargo_summed_resampled <- terra::rast("final_rasters/cargo_summed_resampled_NA.tif")
+tankers_summed_resampled <- terra::rast("final_rasters/tankers_summed_resampled_NA.tif")
+fishing_summed_resampled <- terra::rast("final_rasters/fishing_summed_resampled_NA.tif")
 
-# CCMAR computer
-all_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_all/all_summed.tif")
-cargo_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
-tankers_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
-fishing_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
+cetaceans_sr_raster <- terra::rast("final_rasters/cetaceans_sr_raster_NA.tif")
+testudines_sr_raster <- terra::rast("final_rasters/testudines_sr_raster_NA.tif")
+pinnipeds_sr_raster <- terra::rast("final_rasters/pinnipeds_sr_raster_NA.tif")
+seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
 
-# My disk
-all_summed <- terra::rast("E:/shipless_areas/all_summed.tif")
-cargo_summed <- terra::rast("E:/shipless_areas/cargo_summed.tif")
-tankers_summed <- terra::rast("E:/shipless_areas/tankers_summed.tif")
-fishing_summed <- terra::rast("E:/shipless_areas/fishing_summed.tif")
-#
-#plot(all_summed)
-#plot(cargo_summed)
-#plot(tankers_summed)
-#plot(fishing_summed)
-
-#### 2. Load species richness maps
-cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
-testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
-pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
-seabirds_sr_raster <- terra::rast("seabirds_data/n_species_all_ranges.tif")
-
-#### 3. Same resolution and extent
-
-# 3.1. Check CRS of both rasters
-terra::crs(all_summed)
-terra::crs(cargo_summed)
-terra::crs(tankers_summed)
-terra::crs(fishing_summed)
-#
-terra::crs(cetaceans_sr_raster)
-terra::crs(testudines_sr_raster)
-terra::crs(pinnipeds_sr_raster)
-
-# 3.2. Align rastes
-
-#Check extent and resolution
-
-terra::ext(all_summed)
-#terra::ext(cargo_summed)
-#terra::ext(tankers_summed)
-#terra::ext(fishing_summed)
-#
-terra::res(all_summed)
-#terra::res(cargo_summed)
-#terra::res(tankers_summed)
-#terra::res(fishing_summed)
-#
-terra::ext(cetaceans_sr_raster)
-#terra::ext(testudines_sr_raster)
-#terra::ext(pinnipeds_sr_raster)
-#
-terra::res(cetaceans_sr_raster)
-#terra::res(testudines_sr_raster)
-#terra::res(pinnipeds_sr_raster)
-
-#
-# Resample to match the resolution and extent
-all_summed_resampled <- resample(all_summed, cetaceans_sr_raster)
-cargo_summed_resampled <- resample(cargo_summed, cetaceans_sr_raster)
-tankers_summed_resampled <- resample(tankers_summed, cetaceans_sr_raster)
-fishing_summed_resampled <- resample(fishing_summed, cetaceans_sr_raster)
-#
-seabirds_sr_raster_resampled <- resample(seabirds_sr_raster, cetaceans_sr_raster)
-#plot(seabirds_sr_raster_resampled)
-continents <- terra::vect("shapes/coastline.shp")
-#plot(continents, add=TRUE)
-
-# Crop the raster using the vector leaving out the continents 
-extent_vector <- as.polygons(ext(continents))
-#plot(extent_vector)
-oceans <- erase(extent_vector, continents)
-crs(oceans) <- crs(continents)
-#plot(oceans, add=TRUE)
-seabirds_sr_raster_resampled_cropped <- crop(seabirds_sr_raster_resampled, oceans, mask=TRUE)
-#plot(seabirds_sr_raster_resampled_cropped)
-
-#Save
-terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled.tif")
-terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif")
-terra::writeRaster(tankers_summed_resampled, filename = "tankers_summed_resampled.tif")
-terra::writeRaster(fishing_summed_resampled, filename = "fishing_summed_resampled.tif")
-#Load
-all_summed_resampled <- terra::rast("all_summed_resampled.tif")
-cargo_summed_resampled <- terra::rast("cargo_summed_resampled.tif")
-tankers_summed_resampled <- terra::rast("tankers_summed_resampled.tif")
-fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
-
-#terra::res(all_summed_resampled)
-#terra::res(cargo_summed_resampled)
-#terra::res(tankers_summed_resampled)
-#terra::res(fishing_summed_resampled)
-
-terra::global(all_summed_resampled, fun=quantile, na.rm = TRUE)
-?terra::quantile
 
 # Calculate the tercile breakpoints
 terciles_all_summed <- quantile(values(all_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
@@ -123,48 +29,48 @@ terciles_fishing_summed <- quantile(values(fishing_summed_resampled), probs = c(
 terciles_cetaceans_sr_raster <- quantile(values(cetaceans_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_testudines_sr_raster <- quantile(values(testudines_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_pinnipeds_sr_raster <- quantile(values(pinnipeds_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
-terciles_seabirds_sr_raster_resampled_cropped <- quantile(values(seabirds_sr_raster_resampled_cropped), probs = c(1/3, 2/3), na.rm = TRUE)
+terciles_seabirds_sr_raster_resampled_cropped_ex <- quantile(values(seabirds_sr_raster_resampled_cropped_ext), probs = c(1/3, 2/3), na.rm = TRUE)
 
 # Classify the raster into terciles
 # Create a matrix for classification
-class_matrix_all_summed <- matrix(c(0, terciles_all_summed[1], 1,  # First tercile
+class_matrix_all_summed <- matrix(c(-1, terciles_all_summed[1], 1,  # First tercile
                                  terciles_all_summed[1], terciles_all_summed[2], 2,  # Second tercile
                                  terciles_all_summed[2], as.numeric(global(all_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                  ncol = 3, byrow = TRUE)
 
-class_matrix_cargo_summed <- matrix(c(0, terciles_cargo_summed[1], 1,  # First tercile
+class_matrix_cargo_summed <- matrix(c(-1, terciles_cargo_summed[1], 1,  # First tercile
                                   terciles_cargo_summed[1], terciles_cargo_summed[2], 2,  # Second tercile
                                   terciles_cargo_summed[2], as.numeric(global(cargo_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                   ncol = 3, byrow = TRUE)
 
-class_matrix_tankers_summed <- matrix(c(0, terciles_tankers_summed[1], 1,  # First tercile
+class_matrix_tankers_summed <- matrix(c(-1, terciles_tankers_summed[1], 1,  # First tercile
                                   terciles_tankers_summed[1], terciles_tankers_summed[2], 2,  # Second tercile
                                   terciles_tankers_summed[2], as.numeric(global(tankers_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                    ncol = 3, byrow = TRUE)
 
-class_matrix_fishing_summed <- matrix(c(0, terciles_fishing_summed[1], 1,  # First tercile
+class_matrix_fishing_summed <- matrix(c(-1, terciles_fishing_summed[1], 1,  # First tercile
                                    terciles_fishing_summed[1], terciles_fishing_summed[2], 2,  # Second tercile
                                    terciles_fishing_summed[2], as.numeric(global(fishing_summed_resampled, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                    ncol = 3, byrow = TRUE)
 
-class_matrix_cetaceans <- matrix(c(as.numeric(global(cetaceans_sr_raster, fun=min, na.rm=TRUE)), terciles_cetaceans_sr_raster[1], 1,  # First tercile
+class_matrix_cetaceans <- matrix(c(-1, terciles_cetaceans_sr_raster[1], 1,  # First tercile
                                    terciles_cetaceans_sr_raster[1], terciles_cetaceans_sr_raster[2], 2,  # Second tercile
                                    terciles_cetaceans_sr_raster[2], as.numeric(global(cetaceans_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
-                                    ncol = 3, byrow = TRUE)
+                                   ncol = 3, byrow = TRUE)
 
-class_matrix_testudines <- matrix(c(as.numeric(global(testudines_sr_raster, fun=min, na.rm=TRUE)), terciles_testudines_sr_raster[1], 1,  # First tercile
+class_matrix_testudines <- matrix(c(-1, terciles_testudines_sr_raster[1], 1,  # First tercile
                                     terciles_testudines_sr_raster[1], terciles_testudines_sr_raster[2], 2,  # Second tercile
                                     terciles_testudines_sr_raster[2], as.numeric(global(testudines_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                     ncol = 3, byrow = TRUE)
 
-class_matrix_pinnipeds <- matrix(c(as.numeric(global(pinnipeds_sr_raster, fun=min, na.rm=TRUE)), terciles_pinnipeds_sr_raster[1], 1,  # First tercile
+class_matrix_pinnipeds <- matrix(c(-1, terciles_pinnipeds_sr_raster[1], 1,  # First tercile
                                   terciles_pinnipeds_sr_raster[1], terciles_pinnipeds_sr_raster[2], 2,  # Second tercile
                                   terciles_pinnipeds_sr_raster[2], as.numeric(global(pinnipeds_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                   ncol = 3, byrow = TRUE)
 
-class_matrix_seabirds <- matrix(c(as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=min, na.rm=TRUE)), terciles_seabirds_sr_raster_resampled_cropped[1], 1,  # First tercile
-                                  terciles_seabirds_sr_raster_resampled_cropped[1], terciles_seabirds_sr_raster_resampled_cropped[2], 2,  # Second tercile
-                                  terciles_seabirds_sr_raster_resampled_cropped[2], as.numeric(global(seabirds_sr_raster_resampled_cropped, fun=max, na.rm=TRUE)), 3),  # Third tercile
+class_matrix_seabirds <- matrix(c(-1, terciles_seabirds_sr_raster_resampled_cropped_ex[1], 1,  # First tercile
+                                  terciles_seabirds_sr_raster_resampled_cropped_ex[1], terciles_seabirds_sr_raster_resampled_cropped_ex[2], 2,  # Second tercile
+                                  terciles_seabirds_sr_raster_resampled_cropped_ex[2], as.numeric(global(seabirds_sr_raster_resampled_cropped_ext, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                    ncol = 3, byrow = TRUE)
 
 
@@ -177,7 +83,7 @@ terciles_reclassified_fishing_summed <- terra::classify(fishing_summed_resampled
 terciles_reclassified_cetaceans <- terra::classify(cetaceans_sr_raster, class_matrix_cetaceans)
 terciles_reclassified_testudines <- terra::classify(testudines_sr_raster, class_matrix_testudines)
 terciles_reclassified_pinnipeds <- terra::classify(pinnipeds_sr_raster, class_matrix_pinnipeds)
-terciles_reclassified_seabirds <- terra::classify(seabirds_sr_raster_resampled_cropped, class_matrix_seabirds)
+terciles_reclassified_seabirds <- terra::classify(seabirds_sr_raster_resampled_cropped_ext, class_matrix_seabirds)
 
 # Plot the result
 plot(terciles_reclassified_all_summed)
@@ -193,60 +99,49 @@ plot(terciles_reclassified_seabirds)
 ################################################################################
 
 # Plot
-tiff("terciles_reclassified_all_summed_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_all_summed_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_all_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_cargo_summed_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_cargo_summed_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_cargo_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_tankers_summed_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_tankers_summed_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_tankers_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_fishing_summed_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_fishing_summed_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_fishing_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
 ####
 
-tiff("terciles_reclassified_cetaceans_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_cetaceans_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_cetaceans, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_testudines_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_testudines_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_testudines, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_pinnipeds_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_pinnipeds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_seabirds_05NOV24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_seabirds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
 ################################################################################
 
 #Save
-terra::writeRaster(terciles_reclassified_all_summed, filename = "terciles_reclassified_all_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_cargo_summed, filename = "terciles_reclassified_cargo_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_tankers_summed, filename = "terciles_reclassified_tankers_summed.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_fishing_summed, filename = "terciles_reclassified_fishing_summed.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_all_summed, filename = "tercile_rasters/terciles_reclassified_all_summed_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_cargo_summed, filename = "tercile_rasters/terciles_reclassified_cargo_summed_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_tankers_summed, filename = "tercile_rasters/terciles_reclassified_tankers_summed_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_fishing_summed, filename = "tercile_rasters/terciles_reclassified_fishing_summed_02DEZ24.tif", overwrite = TRUE)
 #
-terra::writeRaster(terciles_reclassified_cetaceans, filename = "terciles_reclassified_cetaceans.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_testudines, filename = "terciles_reclassified_testudines.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_pinnipeds, filename = "terciles_reclassified_pinnipeds.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_seabirds, filename = "terciles_reclassified_seabirds.tif", overwrite = TRUE)
-
-#Load
-terciles_reclassified_all_summed <- terra::rast("terciles_reclassified_all_summed.tif")
-terciles_reclassified_cargo_summed <- terra::rast("terciles_reclassified_cargo_summed.tif")
-terciles_reclassified_tankers_summed <- terra::rast("terciles_reclassified_tankers_summed.tif")
-terciles_reclassified_fishing_summed <- terra::rast("terciles_reclassified_fishing_summed.tif")
-#
-terciles_reclassified_cetaceans <- terra::rast("terciles_reclassified_cetaceans.tif")
-terciles_reclassified_testudines <- terra::rast("terciles_reclassified_testudines.tif")
-terciles_reclassified_pinnipeds <- terra::rast("terciles_reclassified_pinnipeds.tif")
-terciles_reclassified_seabirds <- terra::rast("terciles_reclassified_seabirds.tif")
+terra::writeRaster(terciles_reclassified_cetaceans, filename = "tercile_rasters/terciles_reclassified_cetaceans_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_testudines, filename = "tercile_rasters/terciles_reclassified_testudines_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_pinnipeds, filename = "tercile_rasters/terciles_reclassified_pinnipeds_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_seabirds, filename = "tercile_rasters/terciles_reclassified_seabirds_02DEZ24.tif", overwrite = TRUE)
