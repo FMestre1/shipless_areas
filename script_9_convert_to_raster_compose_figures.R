@@ -7,9 +7,12 @@
 
 #Load package
 library(terra)
+library(ggplot2)
+library(ggrepel)
+
 
 ################################################################################
-#                                   Ceteceans
+#                                   Cetaceans
 ################################################################################
 
 ########## 1. All ships ##########
@@ -66,7 +69,7 @@ tankers_vs_cetaceans_RASTER <- terra::rasterize(tankers_vs_cetaceans_vect,
 terra::writeRaster(tankers_vs_cetaceans_RASTER, filename = "final_bivariate/tankers_vs_cetaceans_BIVARIATE_02DEZ.tif")
 
 ################################################################################
-#                                   Sea Turtles
+#                                  Sea Turtles
 ################################################################################
 
 ########## 1. All ships ##########
@@ -271,7 +274,7 @@ terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "final_bivariate/tanke
 
 
 ################################################################################
-#                          MAP OF OVERALL RISKS
+#                             MAP OF OVERALL RISKS
 ################################################################################
 
 #FMestre
@@ -389,42 +392,38 @@ fraction_biodiv <- exactextractr::exact_extract(quartiles_reclassified_biodivers
 names(fraction_ships) <- paste0("ships_", names(fraction_ships))
 names(fraction_biodiv) <- paste0("biodiv_", names(fraction_biodiv))
 
-data_for_plot <- data.frame(eez_grouped_df[,1], fraction_biodiv, fraction_ships)
 eez_grouped_df <- data.frame(eez_grouped)
-data_for_plot <- data.frame(eez_grouped_df[,1],data_for_plot[,-1]*100)
-names(data_for_plot)[1] <- "country"
-
-View(data_for_plot)
+data_for_plot <- data.frame(eez_grouped_df[,c(1,30)], fraction_biodiv, fraction_ships)
+data_for_plot2 <- data.frame(data_for_plot[,1:2],data_for_plot[,-c(1,2)]*100)
+names(data_for_plot2)[1] <- "country"
+names(data_for_plot2)[2] <- "iso_code"
+#View(data_for_plot2)
 
 
 #Removing "Azerbaijan", "Kazakhstan", "Turkmenistan"
-data_for_plot <- data_for_plot[-c(7, 72, 146),]
+data_for_plot3 <- data_for_plot2[-c(7, 72, 146),]
+View(data_for_plot3)
 
 #Save
-write.csv(data_for_plot, "data_for_plot_02DEZ.csv")
-#data_for_plot <- read.csv("data_for_plot_02DEZ.csv")
+write.csv(data_for_plot3, "data_for_plot_04DEZ.csv")
+#data_for_plot3 <- read.csv("data_for_plot_04DEZ.csv")
 
-#Plot
-png(file="four_axis_plot2.png", width=800, height=800)
-ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = X)) +
-  geom_point(size = 3, color = "darkblue") +
+#Save plot
+png(file="four_axis_plot4.png", width=1000, height=1000)
+ggplot(data_for_plot3, aes(x = ships_frac_4, y = biodiv_frac_4, label = iso_code)) +
+  xlim(0, 125) +
+  #geom_text(size = 3, color = "darkblue") +
+  geom_text_repel(size = 3, max.overlaps = Inf) +  # Use geom_text_repel for readable text
+  #geom_text_repel(size = 3, max.overlaps = Inf) +
   geom_hline(yintercept = 50, linetype = "dashed") +
   geom_vline(xintercept = 50, linetype = "dashed") +
   labs(x = "Ship Density", y = "Biodiversity") +
-  geom_text(hjust = 1.5, vjust = 0, size = 3) +  # Add labels
   theme_minimal()
 dev.off()
 
-################################################################################
 
-library(ggrepel)
 
-png(file="four_axis_plot3.png", width=800, height=800)
-ggplot(data_for_plot, aes(x = ships_frac_4, y = biodiv_frac_4, label = X)) +
-  geom_point(size = 3, color = "darkblue") +
-  geom_hline(yintercept = 50, linetype = "dashed") +
-  geom_vline(xintercept = 50, linetype = "dashed") +
-  labs(x = "Ship Density", y = "Biodiversity") +
-  geom_text_repel(hjust = 1.5, vjust = 0, size = 3, max.overlaps = Inf) +  # Add labels using ggrepel
-  theme_minimal()
-dev.off()
+
+
+
+
