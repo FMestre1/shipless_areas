@@ -19,7 +19,6 @@ testudines_sr_raster <- terra::rast("final_rasters/testudines_sr_raster_NA.tif")
 pinnipeds_sr_raster <- terra::rast("final_rasters/pinnipeds_sr_raster_NA.tif")
 seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
 
-
 # Calculate the tercile breakpoints
 terciles_all_summed <- quantile(values(all_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_cargo_summed <- quantile(values(cargo_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)

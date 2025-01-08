@@ -163,6 +163,131 @@ for(i in 1:length(Neighbours))
 
 plot(AtoB, sites.sp@coords, col="darkgrey", add=TRUE)
 
+################################################################################
+################################################################################
+
+#Load rasters
+sum_all_2011 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2011.tif")
+sum_all_2012 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2012.tif")
+sum_all_2013 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2013.tif")
+sum_all_2014 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2014.tif")
+sum_all_2015 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2015.tif")
+sum_all_2016 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2016.tif")
+sum_all_2017 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2017.tif")
+sum_all_2018 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2018.tif")
+sum_all_2019 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2019.tif")
+sum_all_2020 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2020.tif")
+sum_all_2021 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2021.tif")
+sum_all_2022 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2022.tif")
+sum_all_2023 <- terra::rast("D:/shipless_areas/sum_all/sum_all_2023.tif")
+
+#Cargo
+sum_cargo_2011 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2011.tif")
+sum_cargo_2012 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2012.tif")
+sum_cargo_2013 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2013.tif")
+sum_cargo_2014 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2014.tif")
+sum_cargo_2015 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2015.tif")
+sum_cargo_2016 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2016.tif")
+sum_cargo_2017 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2017.tif")
+sum_cargo_2018 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2018.tif")
+sum_cargo_2019 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2019.tif")
+sum_cargo_2020 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2020.tif")
+sum_cargo_2021 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2021.tif")
+sum_cargo_2022 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2022.tif")
+sum_cargo_2023 <- terra::rast("D:/shipless_areas/sum_cargo/sum_cargo_2023.tif")
+
+#Tankers
+sum_tankers_2011 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2011.tif")
+sum_tankers_2012 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2012.tif")
+sum_tankers_2013 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2013.tif")
+sum_tankers_2014 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2014.tif")
+sum_tankers_2015 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2015.tif")
+sum_tankers_2016 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2016.tif")
+sum_tankers_2017 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2017.tif")
+sum_tankers_2018 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2018.tif")
+sum_tankers_2019 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2019.tif")
+sum_tankers_2020 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2020.tif")
+sum_tankers_2021 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2021.tif")
+sum_tankers_2022 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2022.tif")
+sum_tankers_2023 <- terra::rast("D:/shipless_areas/sum_tankers/sum_tankers_2023.tif")
+
+#Line plot
+years_names <- c(2011, 2012, 2013, 2014, 2015, 2016, 2017,
+                 2018, 2019, 2020, 2021, 2022, 2023)
+
+mean_density <- c(as.numeric(global(sum_all_2011, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2012, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2013, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2014, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2015, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2016, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2017, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2018, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2019, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2020, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2021, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2022, "mean", na.rm=TRUE)),
+                  as.numeric(global(sum_all_2023, "mean", na.rm=TRUE))
+)
+
+sd_shipping <- c(as.numeric(global(sum_all_2011, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2012, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2013, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2014, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2015, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2016, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2017, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2018, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2019, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2020, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2021, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2022, "sd", na.rm=TRUE)),
+                 as.numeric(global(sum_all_2023, "sd", na.rm=TRUE))
+)
+
+shipping_stats <- data.frame(years_names, mean_density, sd_shipping)
+colnames(shipping_stats) <- c("year", "mean", "sd")
+
+plot(shipping_stats$year, shipping_stats$mean, type="l")
+
+##
+
+mean_cargo_density <- c(as.numeric(global(sum_cargo_2011, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2012, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2013, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2014, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2015, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2016, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2017, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2018, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2019, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2020, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2021, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2022, "mean", na.rm=TRUE)),
+                        as.numeric(global(sum_cargo_2023, "mean", na.rm=TRUE))
+)
+
+sd_cargo_shipping <- c(as.numeric(global(sum_cargo_2011, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2012, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2013, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2014, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2015, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2016, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2017, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2018, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2019, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2020, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2021, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2022, "sd", na.rm=TRUE)),
+                       as.numeric(global(sum_cargo_2023, "sd", na.rm=TRUE))
+)
+
+cargo_stats <- data.frame(years_names, mean_cargo_density, sd_cargo_shipping)
+colnames(cargo_stats) <- c("year", "mean", "sd")
+
+plot(cargo_stats$year, cargo_stats$mean, type="l")
+
+##
 
 
 

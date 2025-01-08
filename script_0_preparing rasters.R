@@ -118,7 +118,6 @@ fishing_summed_resampled <- terra::rast("fishing_summed_resampled.tif")
 #FMestre
 #02-12-2024
 
-
 #### 1. Load ships density maps
 #Using raster (to keep compatibility with the functions)
 all_summed_resampled <- terra::rast("all_summed_resampled.tif")
@@ -131,7 +130,7 @@ testudines_sr_raster <- terra::rast("testudines_sr_raster.tif")
 pinnipeds_sr_raster <- terra::rast("pinnipeds_sr_raster.tif")
 seabirds_sr_raster_resampled_cropped_ext <- terra::rast("seabirds_sr_raster_resampled_cropped_ext.tif")
 
-#COnver to NA to 0
+#Convert NA to 0
 all_summed_resampled[is.na(all_summed_resampled[])] <- 0 
 cargo_summed_resampled[is.na(cargo_summed_resampled[])] <- 0 
 tankers_summed_resampled[is.na(tankers_summed_resampled[])] <- 0 
