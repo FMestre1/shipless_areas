@@ -192,21 +192,78 @@ terciles_reclassified_sum_all_2021_resampled_log <- terra::classify(sum_all_2021
 terciles_reclassified_sum_all_2022_resampled_log <- terra::classify(sum_all_2022_resampled_log, class_matrix_sum_all_2022_resampled)
 terciles_reclassified_sum_all_2023_resampled_log <- terra::classify(sum_all_2023_resampled_log, class_matrix_sum_all_2023_resampled)
 
-#Plot
-plot(terciles_reclassified_sum_all_2011_resampled_log)
-plot(terciles_reclassified_sum_all_2012_resampled_log)
-plot(terciles_reclassified_sum_all_2013_resampled_log)
-plot(terciles_reclassified_sum_all_2014_resampled_log)
-plot(terciles_reclassified_sum_all_2015_resampled_log)
-plot(terciles_reclassified_sum_all_2016_resampled_log)
-plot(terciles_reclassified_sum_all_2017_resampled_log)
-plot(terciles_reclassified_sum_all_2018_resampled_log)
-plot(terciles_reclassified_sum_all_2019_resampled_log)
-plot(terciles_reclassified_sum_all_2020_resampled_log)
-plot(terciles_reclassified_sum_all_2021_resampled_log)
-plot(terciles_reclassified_sum_all_2022_resampled_log)
-plot(terciles_reclassified_sum_all_2023_resampled_log)
+# plot only the first tercile
+first_tercile_2011 <- terciles_reclassified_sum_all_2011_resampled_log == 1
+first_tercile_2012 <- terciles_reclassified_sum_all_2012_resampled_log == 1
+first_tercile_2013 <- terciles_reclassified_sum_all_2013_resampled_log == 1
+first_tercile_2014 <- terciles_reclassified_sum_all_2014_resampled_log == 1
+first_tercile_2015 <- terciles_reclassified_sum_all_2015_resampled_log == 1
+first_tercile_2016 <- terciles_reclassified_sum_all_2016_resampled_log == 1
+first_tercile_2017 <- terciles_reclassified_sum_all_2017_resampled_log == 1
+first_tercile_2018 <- terciles_reclassified_sum_all_2018_resampled_log == 1
+first_tercile_2019 <- terciles_reclassified_sum_all_2019_resampled_log == 1
+first_tercile_2020 <- terciles_reclassified_sum_all_2020_resampled_log == 1
+first_tercile_2021 <- terciles_reclassified_sum_all_2021_resampled_log == 1
+first_tercile_2022 <- terciles_reclassified_sum_all_2022_resampled_log == 1
+first_tercile_2023 <- terciles_reclassified_sum_all_2023_resampled_log == 1
+#
+first_tercile_2011 <- first_tercile_2011 * terciles_reclassified_sum_all_2011_resampled_log 
+first_tercile_2012 <- first_tercile_2012 * terciles_reclassified_sum_all_2012_resampled_log 
+first_tercile_2013 <- first_tercile_2013 * terciles_reclassified_sum_all_2013_resampled_log 
+first_tercile_2014 <- first_tercile_2014 * terciles_reclassified_sum_all_2014_resampled_log 
+first_tercile_2015 <- first_tercile_2015 * terciles_reclassified_sum_all_2015_resampled_log 
+first_tercile_2016 <- first_tercile_2016 * terciles_reclassified_sum_all_2016_resampled_log 
+first_tercile_2017 <- first_tercile_2017 * terciles_reclassified_sum_all_2017_resampled_log 
+first_tercile_2018 <- first_tercile_2018 * terciles_reclassified_sum_all_2018_resampled_log 
+first_tercile_2019 <- first_tercile_2019 * terciles_reclassified_sum_all_2019_resampled_log 
+first_tercile_2020 <- first_tercile_2020 * terciles_reclassified_sum_all_2020_resampled_log 
+first_tercile_2021 <- first_tercile_2021 * terciles_reclassified_sum_all_2021_resampled_log 
+first_tercile_2022 <- first_tercile_2022 * terciles_reclassified_sum_all_2022_resampled_log 
+first_tercile_2023 <- first_tercile_2023 * terciles_reclassified_sum_all_2023_resampled_log 
+#
+first_tercile_2011[first_tercile_2011==0] <- NA
+first_tercile_2012[first_tercile_2012==0] <- NA
+first_tercile_2013[first_tercile_2013==0] <- NA
+first_tercile_2014[first_tercile_2014==0] <- NA
+first_tercile_2015[first_tercile_2015==0] <- NA
+first_tercile_2016[first_tercile_2016==0] <- NA
+first_tercile_2017[first_tercile_2017==0] <- NA
+first_tercile_2018[first_tercile_2018==0] <- NA
+first_tercile_2019[first_tercile_2019==0] <- NA
+first_tercile_2020[first_tercile_2020==0] <- NA
+first_tercile_2021[first_tercile_2021==0] <- NA
+first_tercile_2022[first_tercile_2022==0] <- NA
+first_tercile_2023[first_tercile_2023==0] <- NA
 
+#Plot
+par(mfrow=c(7,2))
+
+plot(first_tercile_2011, main="2011", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2012, main="2012", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2013, main="2013", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2014, main="2014", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2015, main="2015", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2016, main="2016", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2017, main="2017", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2018, main="2018", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2019, main="2019", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2020, main="2020", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2021, main="2021", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2022, main="2022", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
+plot(first_tercile_2023, main="2023", col = "darkblue", legend = FALSE)
+plot(continents, add=TRUE)
 
 #write to disk
 terra::writeRaster(terciles_reclassified_sum_all_2011_resampled_log, "year_terciles/terciles_reclassified_sum_all_2011_resampled_log.tif")
@@ -223,17 +280,20 @@ terra::writeRaster(terciles_reclassified_sum_all_2021_resampled_log, "year_terci
 terra::writeRaster(terciles_reclassified_sum_all_2022_resampled_log, "year_terciles/terciles_reclassified_sum_all_2022_resampled_log.tif")
 terra::writeRaster(terciles_reclassified_sum_all_2023_resampled_log, "year_terciles/terciles_reclassified_sum_all_2023_resampled_log.tif")
 
+
+#(...)
+
 #Load if needed
-#terciles_reclassified_sum_all_2011_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2011_resampled_log.tif")
-#terciles_reclassified_sum_all_2012_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2012_resampled_log.tif")
-#terciles_reclassified_sum_all_2013_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2013_resampled_log.tif")
-#terciles_reclassified_sum_all_2014_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2014_resampled_log.tif")
-#terciles_reclassified_sum_all_2015_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2015_resampled_log.tif")
-#terciles_reclassified_sum_all_2016_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2016_resampled_log.tif")
-#terciles_reclassified_sum_all_2017_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2017_resampled_log.tif")
-#terciles_reclassified_sum_all_2018_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2018_resampled_log.tif")
-#terciles_reclassified_sum_all_2019_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2019_resampled_log.tif")
-#terciles_reclassified_sum_all_2020_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2020_resampled_log.tif")
-#terciles_reclassified_sum_all_2021_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2021_resampled_log.tif")
-#terciles_reclassified_sum_all_2022_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2022_resampled_log.tif")
-#terciles_reclassified_sum_all_2023_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2023_resampled_log.tif")
+terciles_reclassified_sum_all_2011_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2011_resampled_log.tif")
+terciles_reclassified_sum_all_2012_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2012_resampled_log.tif")
+terciles_reclassified_sum_all_2013_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2013_resampled_log.tif")
+terciles_reclassified_sum_all_2014_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2014_resampled_log.tif")
+terciles_reclassified_sum_all_2015_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2015_resampled_log.tif")
+terciles_reclassified_sum_all_2016_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2016_resampled_log.tif")
+terciles_reclassified_sum_all_2017_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2017_resampled_log.tif")
+terciles_reclassified_sum_all_2018_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2018_resampled_log.tif")
+terciles_reclassified_sum_all_2019_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2019_resampled_log.tif")
+terciles_reclassified_sum_all_2020_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2020_resampled_log.tif")
+terciles_reclassified_sum_all_2021_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2021_resampled_log.tif")
+terciles_reclassified_sum_all_2022_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2022_resampled_log.tif")
+terciles_reclassified_sum_all_2023_resampled_log <- terra::rast("year_terciles/terciles_reclassified_sum_all_2023_resampled_log.tif")
