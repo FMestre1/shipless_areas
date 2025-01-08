@@ -61,7 +61,7 @@ continents <- terra::vect("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gi
 
 # Create a mask using the vector
 sum_all_2011_resampled_mask <- terra::mask(sum_all_2011_resampled, continents)
-plot(sum_all_2011_resampled_mask)
+#plot(sum_all_2011_resampled_mask)
 
 # Convert all values to NA outside the mask
 sum_all_2011_resampled[!is.na(sum_all_2011_resampled_mask)] <- NA
@@ -78,8 +78,7 @@ sum_all_2021_resampled[!is.na(sum_all_2011_resampled_mask)] <- NA
 sum_all_2022_resampled[!is.na(sum_all_2011_resampled_mask)] <- NA
 sum_all_2023_resampled[!is.na(sum_all_2011_resampled_mask)] <- NA
 
-
-#log tranform
+#log transform
 sum_all_2011_resampled_log <- log(sum_all_2011_resampled+1)
 sum_all_2012_resampled_log <- log(sum_all_2012_resampled+1)
 sum_all_2013_resampled_log <- log(sum_all_2013_resampled+1)
@@ -93,7 +92,6 @@ sum_all_2020_resampled_log <- log(sum_all_2020_resampled+1)
 sum_all_2021_resampled_log <- log(sum_all_2021_resampled+1)
 sum_all_2022_resampled_log <- log(sum_all_2022_resampled+1)
 sum_all_2023_resampled_log <- log(sum_all_2023_resampled+1)
-
 
 #Quantiles
 terciles_sum_all_2011_resampled <- quantile(values(sum_all_2011_resampled_log), probs = c(1/3, 2/3), na.rm = TRUE)
