@@ -18,6 +18,7 @@ cetaceans_sr_raster <- terra::rast("final_rasters/cetaceans_sr_raster_NA.tif")
 testudines_sr_raster <- terra::rast("final_rasters/testudines_sr_raster_NA.tif")
 pinnipeds_sr_raster <- terra::rast("final_rasters/pinnipeds_sr_raster_NA.tif")
 seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
+all_biodiv_sr_raster <- cetaceans_sr_raster + testudines_sr_raster + pinnipeds_sr_raster + seabirds_sr_raster_resampled_cropped_ext
 
 # Calculate the tercile breakpoints
 terciles_all_summed <- quantile(values(all_summed_resampled), probs = c(1/3, 2/3), na.rm = TRUE)
@@ -29,6 +30,7 @@ terciles_cetaceans_sr_raster <- quantile(values(cetaceans_sr_raster), probs = c(
 terciles_testudines_sr_raster <- quantile(values(testudines_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_pinnipeds_sr_raster <- quantile(values(pinnipeds_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 terciles_seabirds_sr_raster_resampled_cropped_ex <- quantile(values(seabirds_sr_raster_resampled_cropped_ext), probs = c(1/3, 2/3), na.rm = TRUE)
+terciles_biodiv_sr_raster <- quantile(values(all_biodiv_sr_raster), probs = c(1/3, 2/3), na.rm = TRUE)
 
 # Classify the raster into terciles
 # Create a matrix for classification
@@ -72,6 +74,10 @@ class_matrix_seabirds <- matrix(c(-1, terciles_seabirds_sr_raster_resampled_crop
                                   terciles_seabirds_sr_raster_resampled_cropped_ex[2], as.numeric(global(seabirds_sr_raster_resampled_cropped_ext, fun=max, na.rm=TRUE)), 3),  # Third tercile
                                    ncol = 3, byrow = TRUE)
 
+class_matrix_all_biodiv <- matrix(c(-1, terciles_biodiv_sr_raster[1], 1,  # First tercile
+                                    terciles_biodiv_sr_raster[1], terciles_biodiv_sr_raster[2], 2,  # Second tercile
+                                    terciles_biodiv_sr_raster[2], as.numeric(global(all_biodiv_sr_raster, fun=max, na.rm=TRUE)), 3),  # Third tercile
+                                    ncol = 3, byrow = TRUE)
 
 # Apply the classification
 terciles_reclassified_all_summed <- terra::classify(all_summed_resampled, class_matrix_all_summed)
@@ -83,17 +89,19 @@ terciles_reclassified_cetaceans <- terra::classify(cetaceans_sr_raster, class_ma
 terciles_reclassified_testudines <- terra::classify(testudines_sr_raster, class_matrix_testudines)
 terciles_reclassified_pinnipeds <- terra::classify(pinnipeds_sr_raster, class_matrix_pinnipeds)
 terciles_reclassified_seabirds <- terra::classify(seabirds_sr_raster_resampled_cropped_ext, class_matrix_seabirds)
+terciles_reclassified_all_biodiv <- terra::classify(all_biodiv_sr_raster, class_matrix_all_biodiv)
 
 # Plot the result
-plot(terciles_reclassified_all_summed)
-plot(terciles_reclassified_cargo_summed)
-plot(terciles_reclassified_tankers_summed)
-plot(terciles_reclassified_fishing_summed)
+terra::plot(terciles_reclassified_all_summed)
+terra::plot(terciles_reclassified_cargo_summed)
+terra::plot(terciles_reclassified_tankers_summed)
+terra::plot(terciles_reclassified_fishing_summed)
 #
-plot(terciles_reclassified_cetaceans)
-plot(terciles_reclassified_testudines)
-plot(terciles_reclassified_pinnipeds)
-plot(terciles_reclassified_seabirds)
+terra::plot(terciles_reclassified_cetaceans)
+terra::plot(terciles_reclassified_testudines)
+terra::plot(terciles_reclassified_pinnipeds)
+terra::plot(terciles_reclassified_seabirds)
+terra::plot(terciles_reclassified_all_biodiv)
 
 ################################################################################
 
@@ -144,3 +152,6 @@ terra::writeRaster(terciles_reclassified_cetaceans, filename = "tercile_rasters/
 terra::writeRaster(terciles_reclassified_testudines, filename = "tercile_rasters/terciles_reclassified_testudines_02DEZ24.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_pinnipeds, filename = "tercile_rasters/terciles_reclassified_pinnipeds_02DEZ24.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_seabirds, filename = "tercile_rasters/terciles_reclassified_seabirds_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_all_biodiv, filename = "tercile_rasters/terciles_reclassified_all_biodiv_20JAN25.tif", overwrite = TRUE)
+
+
