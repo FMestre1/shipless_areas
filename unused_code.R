@@ -759,6 +759,40 @@ marine_realms <- terra::vect("D:\\shipless_areas_paper\\datasets\\Marine biogeog
 ebsa <- terra::vect("D:\\shipless_areas_paper\\datasets\\Ecologically_or_Biologically_Significant_Marine_Areas\\Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
 #terra::plot(ebsa)
 
+################################################################################
+
+
+mpa_zonal <- terra::zonal(terciles_reclassified_all_summed, mpa[1:3,], fun=count, as.polygons=TRUE, na.rm=TRUE) 
+#mpa_zonal_sd <- terra::zonal(all_summed, mpa, fun=sd, as.polygons=TRUE, na.rm=TRUE) 
+#mpa_zonal_df_mean <- as.data.frame(mpa_zonal)
+#mpa_zonal_df_sd <- as.data.frame(mpa_zonal_sd)
+#mpa_zonal_df <- cbind(mpa_zonal_df_mean, mpa_zonal_df_sd$grid_float_All_2011_01_converted)
+#names(mpa_zonal_df)[10:11] <- c("mean", "sd")
+#Save & Load
+#save(mpa_zonal_df, file = "mpa_zonal_df.RData")
+#load("mpa_zonal_df.RData")
+#terra::writeVector(mpa_zonal, "mpa_zonal.shp", overwrite=TRUE)
+#terra::plot(mpa_zonal, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
+#View(marine_realms_df)
+
+#Max
+mpa_zonal_max <- terra::zonal(all_summed, mpa, fun=max, as.polygons=TRUE, na.rm=TRUE) 
+mpa_zonal_max_df <- as.data.frame(mpa_zonal_max)
+
+names(mpa_zonal_max_df)[10] <- "max"
+#Save & Load
+#save(mpa_zonal_max_df, file = "mpa_zonal_max_df.RData")
+#load("mpa_zonal_max_df.RData")
+#terra::writeVector(mpa_zonal_max, "mpa_zonal_max.shp", overwrite=TRUE)
+#terra::plot(mpa_zonal_max, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
+#View(mpa_zonal_max_df)
+#Boxplot
+mpa_zonal_max_df_2 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
+
+#Max - Top 10
+mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
+head(mpa_zonal_max_df_2_top10)
+mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df_2_top10[1:10,]
 
 
 

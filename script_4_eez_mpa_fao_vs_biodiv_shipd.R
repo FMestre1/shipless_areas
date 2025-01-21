@@ -3,7 +3,7 @@
 ################################################################################
 
 #FMestre
-#15-07-2024
+#21-01-2025
 
 #Load package
 library(terra)
@@ -16,7 +16,6 @@ library(terra)
 
 terciles_reclassified_all_summed <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02DEZ24.tif")
 #terra::plot(all_summed)
-#terra::writeRaster(all_summed, "all_summed.tif")
 
 ################################## CONTINENTS ##################################
 
@@ -28,19 +27,24 @@ continent <- terra::vect("C:\\Users\\mestr\\Documents\\0. Artigos\\shipless_area
 fao <- terra::vect("D:\\shipless_areas_paper\\datasets\\FAO\\World_Fao_Areas.shp")
 #terra::plot(fao, add=TRUE)
 
-######################### MARINE PROTECTED AREAS (MPA) #########################
-
-#Upload shapefile
-mpa <- terra::vect("D:\\shipless_areas_paper\\datasets\\MPA\\mpa_assis.shp")
-#terra::plot(mpa)
-View(as.data.frame(mpa))
-
 ####################### EXCLUSIVE ECONOMIC ZONES (EEZ) #########################
 
 #Upload shapefile
 eez <- terra::vect("D:\\shipless_areas_paper\\datasets\\eez\\eez_v12_aggregated.shp")
-#aggregating by country (SOVEREIGN1)
-#terra::plot(eez)
+eez_s <- terra::simplifyGeom(eez, tolerance=0.01)
+#terra::plot(eez_s)
+
+######################### MARINE PROTECTED AREAS (MPA) #########################
+
+#Upload shapefile
+mpa <- terra::vect("D:\\shipless_areas_paper\\datasets\\MPA\\mpa_assis.shp")
+mpa_s <- terra::simplifyGeom(mpa, tolerance=0.01)
+#nrow(mpa_s)
+#length(unique(mpa_s$Name))
+#terra::plot(mpa_s)
+#which polygons of mpa_s overlaps which polygons of eez_s?
+mpa_eez_intersect <- terra::intersect(mpa_s, eez_s)
+#(...)
 
 ################################ SPECIES RICHNESS ##############################
 
@@ -54,38 +58,6 @@ terciles_reclassified_all_biodiv <- terra::rast("tercile_rasters/terciles_reclas
 #                                      MPA
 ################################################################################
 
-#Mean
-mpa_zonal <- terra::zonal(all_summed, mpa, fun=mean, as.polygons=TRUE, na.rm=TRUE) 
-mpa_zonal_sd <- terra::zonal(all_summed, mpa, fun=sd, as.polygons=TRUE, na.rm=TRUE) 
-mpa_zonal_df_mean <- as.data.frame(mpa_zonal)
-mpa_zonal_df_sd <- as.data.frame(mpa_zonal_sd)
-mpa_zonal_df <- cbind(mpa_zonal_df_mean, mpa_zonal_df_sd$grid_float_All_2011_01_converted)
-names(mpa_zonal_df)[10:11] <- c("mean", "sd")
-#Save & Load
-#save(mpa_zonal_df, file = "mpa_zonal_df.RData")
-#load("mpa_zonal_df.RData")
-#terra::writeVector(mpa_zonal, "mpa_zonal.shp", overwrite=TRUE)
-#terra::plot(mpa_zonal, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
-#View(marine_realms_df)
-
-#Max
-mpa_zonal_max <- terra::zonal(all_summed, mpa, fun=max, as.polygons=TRUE, na.rm=TRUE) 
-mpa_zonal_max_df <- as.data.frame(mpa_zonal_max)
-
-names(mpa_zonal_max_df)[10] <- "max"
-#Save & Load
-#save(mpa_zonal_max_df, file = "mpa_zonal_max_df.RData")
-#load("mpa_zonal_max_df.RData")
-#terra::writeVector(mpa_zonal_max, "mpa_zonal_max.shp", overwrite=TRUE)
-#terra::plot(mpa_zonal_max, "grid_float_All_2011_01_converted", palette_yr, type = "continuous")
-#View(mpa_zonal_max_df)
-#Boxplot
-mpa_zonal_max_df_2 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
-
-#Max - Top 10
-mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df[order(mpa_zonal_max_df$max, decreasing = TRUE),]
-head(mpa_zonal_max_df_2_top10)
-mpa_zonal_max_df_2_top10 <- mpa_zonal_max_df_2_top10[1:10,]
 
 ################################################################################
 #                                  FAO REGIONS
