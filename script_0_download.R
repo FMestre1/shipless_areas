@@ -1,5 +1,5 @@
 ################################################################################
-# DOWNLOAD DATA
+#                                 DOWNLOAD DATA
 ################################################################################
 
 #FMestre
@@ -7,6 +7,9 @@
 
 library(terra)
 library(stringr)
+
+#Define the working directory
+setwd("~/github/shipless_areas")
 
 # All Vessels
 

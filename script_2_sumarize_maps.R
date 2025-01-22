@@ -9,6 +9,9 @@
 library(terra)
 #library(ggplot2)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #In terminal access disk
 #list.files("/media/jorgeassis/FMestre/shipless_areas")
 

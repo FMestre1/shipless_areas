@@ -9,6 +9,9 @@
 library(terra)
 library(dplyr)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #Load density rasters (terciles)
 terciles_reclassified_all_summed_2 <- terra::rast("terciles_reclassified_all_summed.tif")
 terciles_reclassified_all_summed_2[is.na(terciles_reclassified_all_summed_2)] <- 0

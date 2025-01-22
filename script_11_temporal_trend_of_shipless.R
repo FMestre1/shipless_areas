@@ -8,6 +8,9 @@
 #Load package
 library(terra)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #For resample
 cetaceans_sr_raster <- terra::rast("cetaceans_sr_raster.tif")
 
@@ -233,35 +236,36 @@ first_tercile_2021[first_tercile_2021==0] <- NA
 first_tercile_2022[first_tercile_2022==0] <- NA
 first_tercile_2023[first_tercile_2023==0] <- NA
 
-#Plot
-par(mfrow=c(7,2))
-
-plot(first_tercile_2011, main="2011", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2012, main="2012", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2013, main="2013", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2014, main="2014", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2015, main="2015", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2016, main="2016", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2017, main="2017", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2018, main="2018", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2019, main="2019", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2020, main="2020", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2021, main="2021", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2022, main="2022", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
-plot(first_tercile_2023, main="2023", col = "darkblue", legend = FALSE)
-plot(continents, add=TRUE)
+#Plot - generate a png file
+png("year_terciles/first_tercile_2011_2023.png", width=5000, height=5000, units="px", pointsize=12)
+par(mfrow=c(5,3), mar=c(2, 2, 4, 2)) # Adjust margins
+plot(first_tercile_2011, main="2011", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2012, main="2012", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2013, main="2013", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2014, main="2014", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2015, main="2015", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2016, main="2016", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2017, main="2017", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2018, main="2018", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2019, main="2019", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2020, main="2020", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2021, main="2021", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2022, main="2022", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+plot(first_tercile_2023, main="2023", col = "lightskyblue4",cex.main = 10, legend = FALSE)
+plot(continents, col = "gray31", border = NA, add=TRUE)
+dev.off()
 
 #write to disk
 terra::writeRaster(terciles_reclassified_sum_all_2011_resampled_log, "year_terciles/terciles_reclassified_sum_all_2011_resampled_log.tif")

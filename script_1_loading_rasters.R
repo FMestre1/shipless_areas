@@ -7,9 +7,9 @@
 
 #Load package
 library(terra)
-#getwd()
-setwd("/home/fredmestre/shipless_areas2")
-ls()
+
+#Define the working directory
+setwd("~/github/shipless_areas")
 
 #file.access(dir("."), mode = 4)
 

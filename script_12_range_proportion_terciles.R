@@ -13,8 +13,9 @@ library(terra)
 library(sf)
 library(ggplot2)
 library(gridExtra)
+library(ggpubr)
 
-#1. Get the range data
+#1. Get the range data from...
 #D:\shipless_areas_paper\datasets\Data_assis_21jan2025\Range maps
 
 #1.1. List all rasters in the folder
@@ -81,6 +82,9 @@ for(i in 1:nrow(overlap_values_df)){
 
 #4.3.save the data frame
 write.csv(overlap_values_df, "overlap_values_df_21jan2025.csv", row.names = FALSE)
+overlap_values_df <- read.csv("overlap_values_df_21jan2025.csv")
+#see table
+View(overlap_values_df)
 
 #5. Create a boxplot for each tercile and each group
 #5.1. Separate the df by group
@@ -145,14 +149,6 @@ box_cetaceans <- ggplot(cetaceans_tercile_percentage, aes(x = percentage, y = as
 # Combine four boxplots in one figure
 #grid.arrange(box_seaturtles, box_seabirds, box_pinnipeds, box_cetaceans, ncol = 2)
 ggarrange(box_seaturtles, box_seabirds, box_pinnipeds, box_cetaceans, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
-
-
-
-
-
-library(ggplot2)
-library(gridExtra)
-library(ggpubr)
 
 # Define a color palette
 my_palette <- c("#556B2F", "#B8860B", "#CD0000")

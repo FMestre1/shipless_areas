@@ -8,6 +8,9 @@
 #Load package
 library(terra)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #List files
 #list.files("/media/jorgeassis/FMestre/shipless_areas")
 

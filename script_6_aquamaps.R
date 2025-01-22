@@ -8,6 +8,9 @@
 # Load necessary libraries
 library(terra)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 # Step 1: Read the CSV file
 global_2020_sr <- read.csv('aquamaps/Global_2020_MarineSpeciesRichness_AquaMaps.csv')
 cetacean_sr <- read.csv('aquamaps/cetacean.csv', skip = 4)

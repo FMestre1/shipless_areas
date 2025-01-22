@@ -8,8 +8,8 @@
 #https://timogrossenbacher.ch/bivariate-maps-with-ggplot2-and-sf/
 #https://cran.r-project.org/web/packages/biscale/vignettes/biscale.html
 
-#WD
-setwd("/home/fredmestre/shipless_areas2")
+#Define the working directory
+setwd("~/github/shipless_areas")
 
 #Load library
 library(biscale)
@@ -80,7 +80,6 @@ all_summed_resampled <- resample(all_summed, cetaceans_sr_raster)
 cargo_summed_resampled <- resample(cargo_summed, cetaceans_sr_raster)
 tankers_summed_resampled <- resample(tankers_summed, cetaceans_sr_raster)
 fishing_summed_resampled <- resample(fishing_summed, cetaceans_sr_raster)
-#
 seabirds_sr_raster_resampled <- resample(seabirds_sr_raster, cetaceans_sr_raster)
 #plot(seabirds_sr_raster_resampled)
 continents <- terra::vect("shapes/coastline.shp")

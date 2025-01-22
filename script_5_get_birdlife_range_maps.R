@@ -9,6 +9,9 @@
 library(terra)
 library(sf)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #load geodatabaase
 birdlife_ranges <- sf::st_read("D:\\Birdlife_range_maps\\BOTW.gdb")
 #birdlife_ranges

@@ -14,6 +14,9 @@ library(cowplot)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
+
 #### 1. Load raster data
 #Have to be loaded as rasters of the raster package
 all_summed_resampled <- raster::raster("final_rasters/all_summed_resampled_NA.tif")
@@ -31,7 +34,7 @@ seabirds_sr_raster_resampled_cropped_ext <- raster::raster("final_rasters/seabir
 world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
 
 #### 3. Get the functions
-source("functions1.R")
+source("script8_1_functions_bivariate_maps.R")
 
 ################################################################################
 # Cetaceans

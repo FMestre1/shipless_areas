@@ -1,5 +1,5 @@
 ################################################################################
-#                     Convert these maps to raster files
+#                     Convert bivariate maps to raster files
 ################################################################################
 
 #FMestre
@@ -10,6 +10,8 @@ library(terra)
 library(ggplot2)
 library(ggrepel)
 
+#Define the working directory
+setwd("~/github/shipless_areas")
 
 ################################################################################
 #                                   Cetaceans
