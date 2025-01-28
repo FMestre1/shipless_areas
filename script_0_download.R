@@ -80,7 +80,7 @@ fishing <- c(
 "https://maplarge-public.s3.amazonaws.com/GMTDS/Standard_Extracts/ShipTypeAgg/Fishing/GMTDS_2011_01-2011_12_ShipTypeAgg_Fishing.zip"
 )
 
-######### DOWNLOAD #########
+######### DOWNLOAD ##########
 
 for(i in 1:length(all_vessels)){
   
