@@ -258,4 +258,3 @@ terra::plot(sum_all_2023_2, range=c(0,100), main = "Year 2023 (all ships, Hrs/km
 all_summed_2 <- all_summed
 all_summed_2[all_summed_2>=100] <- 100
 terra::plot(all_summed_2, range=c(0,100), main = "All shipping activity (Hrs/km2)")
-
