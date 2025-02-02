@@ -9,6 +9,9 @@
 library(terra)
 library(sf)
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 

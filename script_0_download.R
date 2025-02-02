@@ -5,6 +5,10 @@
 #FMestre
 #27-06-2024
 
+#Clear environment
+rm(list = ls()) 
+
+#Load packages
 library(terra)
 library(stringr)
 

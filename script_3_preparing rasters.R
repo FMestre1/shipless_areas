@@ -8,6 +8,9 @@
 #https://timogrossenbacher.ch/bivariate-maps-with-ggplot2-and-sf/
 #https://cran.r-project.org/web/packages/biscale/vignettes/biscale.html
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 
@@ -20,9 +23,9 @@ library(terra)
 # CCMAR computer
 all_summed_no_2011 <- terra::rast("E:/shipless_areas/sum_all_no_2011/all_summed_no_2011.tif")
 last_three_years_21_22_23 <- terra::rast("E:/shipless_areas/sum_all_no_2011/last_three_years_21_22_23.tif")
-cargo_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
-tankers_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
-fishing_summed <- terra::rast("/media/fredmestre/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
+cargo_summed <- terra::rast("E:/shipless_areas/sum_cargo/cargo_summed.tif")
+tankers_summed <- terra::rast("E:/shipless_areas/sum_tankers/tankers_summed.tif")
+fishing_summed <- terra::rast("E:/shipless_areas/sum_fishing/fishing_summed.tif")
 #
 #plot(all_summed)
 #plot(cargo_summed)

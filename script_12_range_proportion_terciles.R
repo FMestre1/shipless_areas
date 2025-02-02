@@ -15,6 +15,9 @@ library(ggplot2)
 library(gridExtra)
 library(ggpubr)
 
+#Clear environment
+rm(list = ls())
+
 #1. Get the range data from...
 #D:\shipless_areas_paper\datasets\Data_assis_21jan2025\Range maps
 

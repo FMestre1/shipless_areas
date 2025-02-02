@@ -9,6 +9,9 @@
 library(terra)
 library(dplyr)
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 
@@ -16,7 +19,7 @@ setwd("~/github/shipless_areas")
 terciles_reclassified_all_summed_2 <- terra::rast("terciles_reclassified_all_summed.tif")
 terciles_reclassified_all_summed_2[is.na(terciles_reclassified_all_summed_2)] <- 0
 
-# Vectors of the areas
+#Vectors of the areas
 mpa <- terra::vect("shapes/mpa_simplified.shp")
 ebsa <- terra::vect("shapes/Ecologically_or_Biologically_Significant_Marine_Areas_(EBSAs).shp")
 marine_realms <- terra::vect("shapes/marineRealms.shp")

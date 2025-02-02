@@ -5,27 +5,24 @@
 #FMestre
 #08-07-2024
 
+#Clear environment
+rm(list = ls()) 
+
 #Load package
 library(terra)
 
 #Define the working directory
 setwd("~/github/shipless_areas")
 
-#List files
-#list.files("/media/jorgeassis/FMestre/shipless_areas")
-
-#setwd("/home/fredmestre/shipless_areas")
-#setwd("/media/jorgeassis/FMestre/shipless_areas")
-
 ################################################################################
 #                                Per ship type
 ################################################################################
 
 #Load maps per ship type
-all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
-cargo_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_cargo/cargo_summed.tif")
-tankers_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_tankers/tankers_summed.tif")
-fishing_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_fishing/fishing_summed.tif")
+all_summed <- terra::rast("E:/shipless_areas/sum_all/all_summed_no_2011.tif")
+cargo_summed <- terra::rast("E:/shipless_areas/sum_cargo/cargo_summed.tif")
+tankers_summed <- terra::rast("E:/shipless_areas/sum_tankers/tankers_summed.tif")
+fishing_summed <- terra::rast("E:/shipless_areas/sum_fishing/fishing_summed.tif")
 #Plot
 terra::plot(all_summed)
 terra::plot(cargo_summed)
@@ -78,18 +75,18 @@ my_colours <- fun_color_range(100)
 options(terra.pal=my_colours)
 
 #loading all monthly maps
-all_january <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_january.tif")
-all_february <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_february.tif")
-all_march <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_march.tif")
-all_april <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_april.tif")
-all_may <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_may.tif")
-all_june <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_june.tif")
-all_july <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_july.tif")
-all_august <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_august.tif")
-all_september <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_september.tif")
-all_october <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_october.tif")
-all_november <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_november.tif")
-all_december <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/all_december.tif")
+all_january <- terra::rast("E:/shipless_areas/all_january.tif")
+all_february <- terra::rast("E:/shipless_areas/all_february.tif")
+all_march <- terra::rast("E:/shipless_areas/all_march.tif")
+all_april <- terra::rast("E:/shipless_areas/all_april.tif")
+all_may <- terra::rast("E:/shipless_areas/all_may.tif")
+all_june <- terra::rast("E:/shipless_areas/all_june.tif")
+all_july <- terra::rast("E:/shipless_areas/all_july.tif")
+all_august <- terra::rast("E:/shipless_areas/all_august.tif")
+all_september <- terra::rast("E:/shipless_areas/all_september.tif")
+all_october <- terra::rast("E:/shipless_areas/all_october.tif")
+all_november <- terra::rast("E:/shipless_areas/all_november.tif")
+all_december <- terra::rast("E:/shipless_areas/all_december.tif")
 
 #Plot
 months_stack <- c(all_january, all_february, all_march, all_april, all_may, all_june, all_july, all_august, all_september, all_october, all_november, all_december)
@@ -174,20 +171,20 @@ options(terra.pal=my_colours)
 
 
 #Loading all yearly maps
-sum_all_2011 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2011.tif")
-sum_all_2012 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2012.tif")
-sum_all_2013 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2013.tif")
-sum_all_2014 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2014.tif")
-sum_all_2015 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2015.tif")
-sum_all_2016 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2016.tif")
-sum_all_2017 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2017.tif")
-sum_all_2018 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2018.tif")
-sum_all_2019 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2019.tif")
-sum_all_2020 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2020.tif")
-sum_all_2021 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2021.tif")
-sum_all_2022 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2022.tif")
-sum_all_2023 <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/sum_all_2023.tif")
-all_summed <- terra::rast("/media/jorgeassis/FMestre/shipless_areas/sum_all/all_summed.tif")
+sum_all_2011 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2011.tif")
+sum_all_2012 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2012.tif")
+sum_all_2013 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2013.tif")
+sum_all_2014 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2014.tif")
+sum_all_2015 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2015.tif")
+sum_all_2016 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2016.tif")
+sum_all_2017 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2017.tif")
+sum_all_2018 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2018.tif")
+sum_all_2019 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2019.tif")
+sum_all_2020 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2020.tif")
+sum_all_2021 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2021.tif")
+sum_all_2022 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2022.tif")
+sum_all_2023 <- terra::rast("E:/shipless_areas/sum_all/sum_all_2023.tif")
+all_summed <- terra::rast("E:/shipless_areas/sum_all/all_summed.tif")
 
 #### 2011 ####
 sum_all_2011_2 <- sum_all_2011

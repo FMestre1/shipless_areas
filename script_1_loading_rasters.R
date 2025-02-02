@@ -5,7 +5,10 @@
 #FMestre
 #15-04-2024
 
-#Load package
+#Clear environment
+rm(list = ls()) 
+
+#Load packages
 library(terra)
 
 #Define the working directory
@@ -16,9 +19,10 @@ setwd("~/github/shipless_areas")
 #Set new wd, should be this one
 #list.files("/media/jorgeassis/FMestre/shipless_areas")
 
+#Define temp directory
 terraOptions(tempdir = "temp")
 
-#Check tem files
+#Check temporary files
 tmpFiles()
 
 #Check free space in my external drive

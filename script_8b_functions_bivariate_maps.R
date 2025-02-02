@@ -9,13 +9,12 @@
 #https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188#file-bivarrasterplot-r
 
 
-# The function that produces the colour matrix
+#The function that produces the colour matrix
 colmat <- function(nbreaks = 3, breakstyle = "quantile",
                    upperleft = "#0096EB", upperright = "#820050", 
                    bottomleft = "#BEBEBE", bottomright = "#FFE60F",
                    xlab = "x label", ylab = "y label", plotLeg = TRUE,
                    saveLeg = FALSE) {
-  # TODO - replace any tidyr, dplyr etc. functions with data.table #
   library(tidyverse)
   require(ggplot2)
   require(classInt)

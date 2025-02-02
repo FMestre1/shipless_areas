@@ -10,6 +10,9 @@ library(terra)
 library(ggplot2)
 library(ggrepel)
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 

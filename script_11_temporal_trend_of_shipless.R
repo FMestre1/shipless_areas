@@ -8,6 +8,9 @@
 #Load package
 library(terra)
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 

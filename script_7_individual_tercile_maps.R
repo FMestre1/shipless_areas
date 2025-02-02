@@ -9,10 +9,13 @@
 library(biscale)
 library(terra)
 
+#Clear environment
+rm(list = ls())
+
 #Define the working directory
 setwd("~/github/shipless_areas")
 
-all_summed_resampled <- terra::rast("final_rasters/all_summed_resampled_NA.tif")
+all_summed_resampled <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
 cargo_summed_resampled <- terra::rast("final_rasters/cargo_summed_resampled_NA.tif")
 tankers_summed_resampled <- terra::rast("final_rasters/tankers_summed_resampled_NA.tif")
 fishing_summed_resampled <- terra::rast("final_rasters/fishing_summed_resampled_NA.tif")
