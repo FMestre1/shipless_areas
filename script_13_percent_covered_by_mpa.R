@@ -64,6 +64,7 @@ percentage_covered2 <- (mpa_ppa_area / total_ppa_area) * 100
 pma <- priority_global == 2  # This creates a boolean (TRUE/FALSE) raster
 pma[pma == 0] <- NA   # Set all FALSE values (not 1) to NA
 pma <- pma*priority_global
+pma[pma == 2] <- 1
 #plot(pma)
 
 #Zonal statistics
