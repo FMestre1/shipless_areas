@@ -112,52 +112,66 @@ terra::plot(terciles_reclassified_all_biodiv)
 ################################################################################
 
 # Plot
-tiff("terciles_reclassified_all_summed_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_all_summed_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_all_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_cargo_summed_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_cargo_summed_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_cargo_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_tankers_summed_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_tankers_summed_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_tankers_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
-tiff("terciles_reclassified_fishing_summed_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_fishing_summed_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_fishing_summed, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
 dev.off()
 
 ####
 
-tiff("terciles_reclassified_cetaceans_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_cetaceans_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_cetaceans, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_testudines_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_testudines_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_testudines, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_pinnipeds_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_pinnipeds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
-tiff("terciles_reclassified_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("terciles_reclassified_seabirds_02FEv25.tif", width=5000, height=2900, res=300)
 plot(terciles_reclassified_seabirds, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
+dev.off()
+
+tiff("terciles_reclassified_all_biodiversity_02FEv25.tif", width=5000, height=2900, res=300)
+plot(terciles_reclassified_all_biodiv, col = c("#C3B3D8" ,"#735F9B", "#240D5E"))
 dev.off()
 
 ################################################################################
 
 #Save
-terra::writeRaster(terciles_reclassified_all_summed, filename = "tercile_rasters/terciles_reclassified_all_summed_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_cargo_summed, filename = "tercile_rasters/terciles_reclassified_cargo_summed_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_tankers_summed, filename = "tercile_rasters/terciles_reclassified_tankers_summed_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_fishing_summed, filename = "tercile_rasters/terciles_reclassified_fishing_summed_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_all_summed, filename = "tercile_rasters/terciles_reclassified_all_summed_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_cargo_summed, filename = "tercile_rasters/terciles_reclassified_cargo_summed_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_tankers_summed, filename = "tercile_rasters/terciles_reclassified_tankers_summed_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_fishing_summed, filename = "tercile_rasters/terciles_reclassified_fishing_summed_02FEV25.tif", overwrite = TRUE)
 #
-terra::writeRaster(terciles_reclassified_cetaceans, filename = "tercile_rasters/terciles_reclassified_cetaceans_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_testudines, filename = "tercile_rasters/terciles_reclassified_testudines_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_pinnipeds, filename = "tercile_rasters/terciles_reclassified_pinnipeds_02DEZ24.tif", overwrite = TRUE)
-terra::writeRaster(terciles_reclassified_seabirds, filename = "tercile_rasters/terciles_reclassified_seabirds_02DEZ24.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_cetaceans, filename = "tercile_rasters/terciles_reclassified_cetaceans_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_testudines, filename = "tercile_rasters/terciles_reclassified_testudines_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_pinnipeds, filename = "tercile_rasters/terciles_reclassified_pinnipeds_02FEV25.tif", overwrite = TRUE)
+terra::writeRaster(terciles_reclassified_seabirds, filename = "tercile_rasters/terciles_reclassified_seabirds_02FEV25.tif", overwrite = TRUE)
 terra::writeRaster(terciles_reclassified_all_biodiv, filename = "tercile_rasters/terciles_reclassified_all_biodiv_20JAN25.tif", overwrite = TRUE)
 
-
+#Load
+terciles_reclassified_all_summed <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02FEV25.tif")
+terciles_reclassified_cargo_summed <- terra::rast("tercile_rasters/terciles_reclassified_cargo_summed_02FEV25.tif")
+terciles_reclassified_tankers_summed <- terra::rast("tercile_rasters/terciles_reclassified_tankers_summed_02FEV25.tif")
+terciles_reclassified_fishing_summed <- terra::rast("tercile_rasters/terciles_reclassified_fishing_summed_02FEV25.tif")
+#
+terciles_reclassified_cetaceans <- terra::rast("tercile_rasters/terciles_reclassified_cetaceans_02FEV25.tif")
+terciles_reclassified_testudines <- terra::rast("tercile_rasters/terciles_reclassified_testudines_02FEV25.tif")
+terciles_reclassified_pinnipeds <- terra::rast("tercile_rasters/terciles_reclassified_pinnipeds_02FEV25.tif")
+terciles_reclassified_seabirds <- terra::rast("tercile_rasters/terciles_reclassified_seabirds_02FEV25.tif")
+terciles_reclassified_all_biodiv <- terra::rast("tercile_rasters/terciles_reclassified_all_biodiv_20JAN25.tif")

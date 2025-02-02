@@ -11,7 +11,7 @@ library(ggplot2)
 library(ggrepel)
 
 #Clear environment
-rm(list = ls())
+#rm(list = ls())
 
 #Define the working directory
 setwd("~/github/shipless_areas")
@@ -23,18 +23,19 @@ setwd("~/github/shipless_areas")
 ########## 1. All ships ##########
 
 #Get a raster to be the template
-all_summed_resampled <- terra::rast("all_summed_resampled.tif")
+all_summed_resampled_NA <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
+
 
 #Convert
 all_ships_vs_cetaceans_df <- as.data.frame(all_ships_vs_cetaceans)
 all_ships_vs_cetaceans_df_vect <- terra::vect(all_ships_vs_cetaceans_df, geom = c("x", "y"))
 all_ships_vs_cetaceans_RASTER <- terra::rasterize(all_ships_vs_cetaceans_df_vect, 
-                                           all_summed_resampled, 
+                                           all_summed_resampled_NA, 
                                            field = "BivValue", 
                                            fun = "mean")
 
 #Save
-terra::writeRaster(all_ships_vs_cetaceans_RASTER, filename = "final_bivariate/all_ships_vs_cetaceans_BIVARIATE_02DEZ.tif")
+terra::writeRaster(all_ships_vs_cetaceans_RASTER, filename = "final_bivariate/all_ships_vs_cetaceans_BIVARIATE_02FEV25.tif")
 
 
 ########## 2. Cargo ships ##########
@@ -43,11 +44,11 @@ terra::writeRaster(all_ships_vs_cetaceans_RASTER, filename = "final_bivariate/al
 cargo_vs_cetaceans_df <- as.data.frame(cargo_vs_cetaceans)
 cargo_vs_cetaceans_vect <- terra::vect(cargo_vs_cetaceans_df, geom = c("x", "y"))
 cargo_vs_cetaceans_RASTER <- terra::rasterize(cargo_vs_cetaceans_vect, 
-                                             all_summed_resampled, 
+                                             all_summed_resampled_NA, 
                                              field = "BivValue", 
                                              fun = "mean")
 #Save
-terra::writeRaster(cargo_vs_cetaceans_RASTER, filename = "final_bivariate/cargo_vs_cetaceans_BIVARIATE_02DEZ.tif")
+terra::writeRaster(cargo_vs_cetaceans_RASTER, filename = "final_bivariate/cargo_vs_cetaceans_BIVARIATE_02FEV25.tif")
 
 ########## 3. Fishing ships ##########
 
@@ -55,11 +56,11 @@ terra::writeRaster(cargo_vs_cetaceans_RASTER, filename = "final_bivariate/cargo_
 fishing_vs_cetaceans_df <- as.data.frame(fishing_ships_vs_cetaceans)
 fishing_vs_cetaceans_vect <- terra::vect(fishing_vs_cetaceans_df, geom = c("x", "y"))
 fishing_vs_cetaceans_RASTER <- terra::rasterize(fishing_vs_cetaceans_vect, 
-                                              all_summed_resampled, 
+                                              all_summed_resampled_NA, 
                                               field = "BivValue", 
                                               fun = "mean")
 #Save
-terra::writeRaster(fishing_vs_cetaceans_RASTER, filename = "final_bivariate/fishing_vs_cetaceans_BIVARIATE_02DEZ.tif")
+terra::writeRaster(fishing_vs_cetaceans_RASTER, filename = "final_bivariate/fishing_vs_cetaceans_BIVARIATE_02FEV25.tif")
 
 ########## 4. Tankers ##########
 
@@ -67,11 +68,11 @@ terra::writeRaster(fishing_vs_cetaceans_RASTER, filename = "final_bivariate/fish
 tankers_vs_cetaceans_df <- as.data.frame(tankers_vs_cetaceans)
 tankers_vs_cetaceans_vect <- terra::vect(tankers_vs_cetaceans_df, geom = c("x", "y"))
 tankers_vs_cetaceans_RASTER <- terra::rasterize(tankers_vs_cetaceans_vect, 
-                                                all_summed_resampled, 
+                                                all_summed_resampled_NA, 
                                                 field = "BivValue", 
                                                 fun = "mean")
 #Save
-terra::writeRaster(tankers_vs_cetaceans_RASTER, filename = "final_bivariate/tankers_vs_cetaceans_BIVARIATE_02DEZ.tif")
+terra::writeRaster(tankers_vs_cetaceans_RASTER, filename = "final_bivariate/tankers_vs_cetaceans_BIVARIATE_02FEV25.tif")
 
 ################################################################################
 #                                  Sea Turtles
@@ -83,12 +84,12 @@ terra::writeRaster(tankers_vs_cetaceans_RASTER, filename = "final_bivariate/tank
 all_ships_vs_turtles_df <- as.data.frame(all_ships_vs_turtles)
 all_ships_vs_turtles_df_vect <- terra::vect(all_ships_vs_turtles_df, geom = c("x", "y"))
 all_ships_vs_turtles_RASTER <- terra::rasterize(all_ships_vs_turtles_df_vect, 
-                                                all_summed_resampled, 
+                                                all_summed_resampled_NA, 
                                                 field = "BivValue", 
                                                 fun = "mean")
 
 #Save
-terra::writeRaster(all_ships_vs_turtles_RASTER, filename = "final_bivariate/all_ships_vs_turtles_BIVARIATE_02DEZ.tif")
+terra::writeRaster(all_ships_vs_turtles_RASTER, filename = "final_bivariate/all_ships_vs_turtles_BIVARIATE_02FEV25.tif")
 
 
 ########## 2. Cargo ships ##########
@@ -97,11 +98,11 @@ terra::writeRaster(all_ships_vs_turtles_RASTER, filename = "final_bivariate/all_
 cargo_vs_turtles_df <- as.data.frame(cargo_vs_turtles)
 cargo_vs_turtles_vect <- terra::vect(cargo_vs_turtles_df, geom = c("x", "y"))
 cargo_vs_turtles_RASTER <- terra::rasterize(cargo_vs_turtles_vect, 
-                                            all_summed_resampled, 
+                                            all_summed_resampled_NA, 
                                             field = "BivValue", 
                                             fun = "mean")
 #Save
-terra::writeRaster(cargo_vs_turtles_RASTER, filename = "final_bivariate/cargo_vs_turtles_BIVARIATE_02DEZ.tif")
+terra::writeRaster(cargo_vs_turtles_RASTER, filename = "final_bivariate/cargo_vs_turtles_BIVARIATE_02FEV25.tif")
 
 ########## 3. Fishing ships ##########
 
@@ -109,11 +110,11 @@ terra::writeRaster(cargo_vs_turtles_RASTER, filename = "final_bivariate/cargo_vs
 fishing_vs_turtles_df <- as.data.frame(fishing_vs_turtles)
 fishing_vs_turtles_vect <- terra::vect(fishing_vs_turtles_df, geom = c("x", "y"))
 fishing_vs_turtles_RASTER <- terra::rasterize(fishing_vs_turtles_vect, 
-                                              all_summed_resampled, 
+                                              all_summed_resampled_NA, 
                                               field = "BivValue", 
                                               fun = "mean")
 #Save
-terra::writeRaster(fishing_vs_turtles_RASTER, filename = "final_bivariate/fishing_vs_turtles_BIVARIATE_02DEZ.tif")
+terra::writeRaster(fishing_vs_turtles_RASTER, filename = "final_bivariate/fishing_vs_turtles_BIVARIATE_02FEV25.tif")
 
 ########## 4. Tankers ##########
 
@@ -121,11 +122,11 @@ terra::writeRaster(fishing_vs_turtles_RASTER, filename = "final_bivariate/fishin
 tankers_vs_turtles_df <- as.data.frame(tankers_vs_turtles)
 tankers_vs_turtles_vect <- terra::vect(tankers_vs_turtles_df, geom = c("x", "y"))
 tankers_vs_turtles_RASTER <- terra::rasterize(tankers_vs_turtles_vect, 
-                                              all_summed_resampled, 
+                                              all_summed_resampled_NA, 
                                               field = "BivValue", 
                                               fun = "mean")
 #Save
-terra::writeRaster(tankers_vs_turtles_RASTER, filename = "final_bivariate/tankers_vs_turtles_BIVARIATE_02DEZ.tif")
+terra::writeRaster(tankers_vs_turtles_RASTER, filename = "final_bivariate/tankers_vs_turtles_BIVARIATE_02FEV25.tif")
 
 ################################################################################
 #                                   Pinnipeds
@@ -137,12 +138,12 @@ terra::writeRaster(tankers_vs_turtles_RASTER, filename = "final_bivariate/tanker
 all_ships_vs_pinnipeds_df <- as.data.frame(all_ships_vs_pinnipeds)
 all_ships_vs_pinnipeds_df_vect <- terra::vect(all_ships_vs_pinnipeds_df, geom = c("x", "y"))
 all_ships_vs_pinnipeds_RASTER <- terra::rasterize(all_ships_vs_pinnipeds_df_vect, 
-                                                  all_summed_resampled, 
+                                                  all_summed_resampled_NA, 
                                                   field = "BivValue", 
                                                   fun = "mean")
 
 #Save
-terra::writeRaster(all_ships_vs_pinnipeds_RASTER, filename = "final_bivariate/all_ships_vs_pinnipeds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(all_ships_vs_pinnipeds_RASTER, filename = "final_bivariate/all_ships_vs_pinnipeds_BIVARIATE_02FEV25.tif")
 
 
 ########## 2. Cargo ships ##########
@@ -151,11 +152,11 @@ terra::writeRaster(all_ships_vs_pinnipeds_RASTER, filename = "final_bivariate/al
 cargo_vs_pinnipeds_df <- as.data.frame(cargo_vs_pinnipeds)
 cargo_vs_pinnipeds_vect <- terra::vect(cargo_vs_pinnipeds_df, geom = c("x", "y"))
 cargo_vs_pinnipeds_RASTER <- terra::rasterize(cargo_vs_pinnipeds_vect, 
-                                              all_summed_resampled, 
+                                              all_summed_resampled_NA, 
                                               field = "BivValue", 
                                               fun = "mean")
 #Save
-terra::writeRaster(cargo_vs_pinnipeds_RASTER, filename = "final_bivariate/cargo_vs_pinnipeds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(cargo_vs_pinnipeds_RASTER, filename = "final_bivariate/cargo_vs_pinnipeds_BIVARIATE_02FEV25.tif")
 
 ########## 3. Fishing ships ##########
 
@@ -163,11 +164,11 @@ terra::writeRaster(cargo_vs_pinnipeds_RASTER, filename = "final_bivariate/cargo_
 fishing_vs_pinnipeds_df <- as.data.frame(fishing_vs_pinnipeds)
 fishing_vs_pinnipeds_vect <- terra::vect(fishing_vs_pinnipeds_df, geom = c("x", "y"))
 fishing_vs_pinnipeds_RASTER <- terra::rasterize(fishing_vs_pinnipeds_vect, 
-                                                all_summed_resampled, 
+                                                all_summed_resampled_NA, 
                                                 field = "BivValue", 
                                                 fun = "mean")
 #Save
-terra::writeRaster(fishing_vs_pinnipeds_RASTER, filename = "final_bivariate/fishing_vs_pinnipeds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(fishing_vs_pinnipeds_RASTER, filename = "final_bivariate/fishing_vs_pinnipeds_BIVARIATE_02FEV25.tif")
 
 ########## 4. Tankers ##########
 
@@ -175,11 +176,11 @@ terra::writeRaster(fishing_vs_pinnipeds_RASTER, filename = "final_bivariate/fish
 tankers_vs_pinnipeds_df <- as.data.frame(tankers_vs_pinnipeds)
 tankers_vs_pinnipeds_vect <- terra::vect(tankers_vs_pinnipeds_df, geom = c("x", "y"))
 tankers_vs_pinnipeds_RASTER <- terra::rasterize(tankers_vs_pinnipeds_vect, 
-                                                all_summed_resampled, 
+                                                all_summed_resampled_NA, 
                                                 field = "BivValue", 
                                                 fun = "mean")
 #Save
-terra::writeRaster(tankers_vs_pinnipeds_RASTER, filename = "final_bivariate/tankers_vs_pinnipeds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(tankers_vs_pinnipeds_RASTER, filename = "final_bivariate/tankers_vs_pinnipeds_BIVARIATE_02FEV25.tif")
 
 ################################################################################
 #                                   Sea Birds
@@ -191,12 +192,12 @@ terra::writeRaster(tankers_vs_pinnipeds_RASTER, filename = "final_bivariate/tank
 all_ships_vs_seabirds_df <- as.data.frame(all_ships_vs_seabirds)
 all_ships_vs_seabirds_df_vect <- terra::vect(all_ships_vs_seabirds_df, geom = c("x", "y"))
 all_ships_vs_seabirds_RASTER <- terra::rasterize(all_ships_vs_seabirds_df_vect, 
-                                                 all_summed_resampled, 
+                                                 all_summed_resampled_NA, 
                                                  field = "BivValue", 
                                                  fun = "mean")
 
 #Save
-terra::writeRaster(all_ships_vs_seabirds_RASTER, filename = "final_bivariate/all_ships_vs_seabirds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(all_ships_vs_seabirds_RASTER, filename = "final_bivariate/all_ships_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 
 ########## 2. Cargo ships ##########
@@ -205,11 +206,11 @@ terra::writeRaster(all_ships_vs_seabirds_RASTER, filename = "final_bivariate/all
 cargo_vs_seabirds_df <- as.data.frame(cargo_vs_seabirds)
 cargo_vs_seabirds_vect <- terra::vect(cargo_vs_seabirds_df, geom = c("x", "y"))
 cargo_vs_seabirds_RASTER <- terra::rasterize(cargo_vs_seabirds_vect, 
-                                             all_summed_resampled, 
+                                             all_summed_resampled_NA, 
                                              field = "BivValue", 
                                              fun = "mean")
 #Save
-terra::writeRaster(cargo_vs_seabirds_RASTER, filename = "final_bivariate/cargo_vs_seabirds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(cargo_vs_seabirds_RASTER, filename = "final_bivariate/cargo_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 ########## 3. Fishing ships ##########
 
@@ -217,11 +218,11 @@ terra::writeRaster(cargo_vs_seabirds_RASTER, filename = "final_bivariate/cargo_v
 fishing_vs_seabirds_df <- as.data.frame(fishing_vs_seabirds)
 fishing_vs_seabirds_vect <- terra::vect(fishing_vs_seabirds_df, geom = c("x", "y"))
 fishing_vs_seabirds_RASTER <- terra::rasterize(fishing_vs_seabirds_vect, 
-                                               all_summed_resampled, 
+                                               all_summed_resampled_NA, 
                                                field = "BivValue", 
                                                fun = "mean")
 #Save
-terra::writeRaster(fishing_vs_seabirds_RASTER, filename = "final_bivariate/fishing_vs_seabirds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(fishing_vs_seabirds_RASTER, filename = "final_bivariate/fishing_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 ########## 4. Tankers ##########
 
@@ -229,23 +230,22 @@ terra::writeRaster(fishing_vs_seabirds_RASTER, filename = "final_bivariate/fishi
 tankers_vs_seabirds_df <- as.data.frame(tankers_vs_seabirds)
 tankers_vs_seabirds_vect <- terra::vect(tankers_vs_seabirds_df, geom = c("x", "y"))
 tankers_vs_seabirds_RASTER <- terra::rasterize(tankers_vs_seabirds_vect, 
-                                               all_summed_resampled, 
+                                               all_summed_resampled_NA, 
                                                field = "BivValue", 
                                                fun = "mean")
 #Save
-terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "final_bivariate/tankers_vs_seabirds_BIVARIATE_02DEZ.tif")
+terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "final_bivariate/tankers_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 ################################################################################
 #                                 Overall Map
 ################################################################################
 
-
 #library(terra)
 
-#all_ships_vs_cetaceans_RASTER <- terra::rast("final_bivariate/all_ships_vs_cetaceans_BIVARIATE_02DEZ.tif")
-#all_ships_vs_turtles_RASTER <- terra::rast("final_bivariate/all_ships_vs_turtles_BIVARIATE_02DEZ.tif")
-#all_ships_vs_pinnipeds_RASTER <- terra::rast("final_bivariate/all_ships_vs_pinnipeds_BIVARIATE_02DEZ.tif")
-#all_ships_vs_seabirds_RASTER <- terra::rast("final_bivariate/all_ships_vs_seabirds_BIVARIATE_02DEZ.tif")
+#all_ships_vs_cetaceans_RASTER <- terra::rast("final_bivariate/all_ships_vs_cetaceans_BIVARIATE_02FEV25.tif")
+#all_ships_vs_turtles_RASTER <- terra::rast("final_bivariate/all_ships_vs_turtles_BIVARIATE_02FEV25.tif")
+#all_ships_vs_pinnipeds_RASTER <- terra::rast("final_bivariate/all_ships_vs_pinnipeds_BIVARIATE_02FEV25.tif")
+#all_ships_vs_seabirds_RASTER <- terra::rast("final_bivariate/all_ships_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 #Define NA as zero
 ##all_ships_vs_cetaceans_RASTER[is.na(all_ships_vs_cetaceans_RASTER[])] <- 0 
@@ -264,7 +264,7 @@ terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "final_bivariate/tanke
 #                all_ships_vs_seabirds_RASTER
 
 #plot(all_hotspots)
-#terra::writeRaster(all_hotspots, filename = "all_hotspots_RASTER_02DEZ.tif")
+#terra::writeRaster(all_hotspots, filename = "all_hotspots_RASTER_02FEV25.tif")
 
 #Make plot
 #world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
@@ -293,8 +293,8 @@ cetaceans_sr_raster <- terra::rast("final_rasters/cetaceans_sr_raster_NA.tif")
 testudines_sr_raster <- terra::rast("final_rasters/testudines_sr_raster_NA.tif")
 pinnipeds_sr_raster <- terra::rast("final_rasters/pinnipeds_sr_raster_NA.tif")
 seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
-all_summed_resampled <- terra::rast("final_rasters/all_summed_resampled_NA.tif")
-all_summed_resampled_log <- log10(all_summed_resampled+1) #Log transform
+all_summed_resampled_NA <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
+all_summed_resampled_NA_log <- log10(all_summed_resampled_NA+1) #Log transform
 
 #Convert NA to 0
 #cetaceans_sr_raster[is.na(cetaceans_sr_raster[])] <- 0 
@@ -307,7 +307,7 @@ cetaceans_sr_raster_standardized <- cetaceans_sr_raster/43
 testudines_sr_raster_standardized <- testudines_sr_raster/6
 pinnipeds_sr_raster_standardized <- pinnipeds_sr_raster/10
 seabirds_sr_raster_resampled_cropped_ext_standardized <- seabirds_sr_raster_resampled_cropped_ext/68
-all_summed__standardized <- (all_summed_resampled_log - terra::minmax(all_summed_resampled_log)[1]) / (terra::minmax(all_summed_resampled_log)[2] - terra::minmax(all_summed_resampled_log)[1])
+all_summed__standardized <- (all_summed_resampled_NA_log - terra::minmax(all_summed_resampled_NA_log)[1]) / (terra::minmax(all_summed_resampled_NA_log)[2] - terra::minmax(all_summed_resampled_NA_log)[1])
 
 #Combine biodiversity and ships
 ships_cetaceans_sr_raster <- all_summed__standardized * cetaceans_sr_raster_standardized
@@ -327,11 +327,11 @@ plot(overall_conflict_standardized)
 #overall_conflict_standardized[is.na(overall_conflict_standardized[])] <- 0 
 
 #Save it...
-terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized2_02DEZ.tif", overwrite=TRUE)
-#overall_conflict_standardized  <- terra::rast("overall_conflict_standardized2_02DEZ.tif")
+terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized2_02FEV25.tif", overwrite=TRUE)
+#overall_conflict_standardized  <- terra::rast("overall_conflict_standardized2_02FEV25.tif")
 
 ################################################################################
-#                                 FOUR AXIS PLOT
+#                         FOUR AXIS PLOT (not used)
 ################################################################################
 
 #FMestre
@@ -358,18 +358,18 @@ seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_
 #seabirds_sr_raster_resampled_cropped_ext[is.na(seabirds_sr_raster_resampled_cropped_ext[])] <- 0 
 biodiv <- cetaceans_sr_raster + testudines_sr_raster + pinnipeds_sr_raster + seabirds_sr_raster_resampled_cropped_ext
 
-all_summed_resampled <- terra::rast("final_rasters/all_summed_resampled_NA.tif")
+all_summed_resampled_NA <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
 
 #Reclassify biodiversity and ships with quartiles
 #Isolate >75%
 
-quartiles_ships <- quantile(values(all_summed_resampled), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
+quartiles_ships <- quantile(values(all_summed_resampled_NA), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
 quartiles_biodiversity <- quantile(values(biodiv), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
 
 class_matrix_all_ships <- matrix(c(0, quartiles_ships[1], 1,  # First quartile
                                    quartiles_ships[1], quartiles_ships[2], 2,  # Second quartile
                                    quartiles_ships[2], quartiles_ships[3], 3,  # Third quartile
-                                   quartiles_ships[3], as.numeric(global(all_summed_resampled, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
+                                   quartiles_ships[3], as.numeric(global(all_summed_resampled_NA, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
                                    ncol = 3, byrow = TRUE)
 
 
@@ -380,11 +380,11 @@ class_matrix_bidiversity <- matrix(c(-1, quartiles_biodiversity[1], 1,  # First 
                                      ncol = 3, byrow = TRUE)
 
 
-quartiles_reclassified_ships <- terra::classify(all_summed_resampled, class_matrix_all_ships)
+quartiles_reclassified_ships <- terra::classify(all_summed_resampled_NA, class_matrix_all_ships)
 quartiles_reclassified_biodiversity <- terra::classify(biodiv, class_matrix_bidiversity)
 
-terra::writeRaster(quartiles_reclassified_ships, "quartiles_reclassified_ships_02DEZ.tif")
-terra::writeRaster(quartiles_reclassified_biodiversity, "quartiles_reclassified_biodiversity_02DEZ.tif")
+terra::writeRaster(quartiles_reclassified_ships, "quartiles_reclassified_ships_02FEV25.tif")
+terra::writeRaster(quartiles_reclassified_biodiversity, "quartiles_reclassified_biodiversity_02FEV25.tif")
 
 #Extract per EEZ
 eez <- terra::vect("eez.shp")
@@ -403,7 +403,6 @@ data_for_plot2 <- data.frame(data_for_plot[,1:2],data_for_plot[,-c(1,2)]*100)
 names(data_for_plot2)[1] <- "country"
 names(data_for_plot2)[2] <- "iso_code"
 #View(data_for_plot2)
-
 
 #Removing "Azerbaijan", "Kazakhstan", "Turkmenistan"
 data_for_plot3 <- data_for_plot2[-c(7, 72, 146),]

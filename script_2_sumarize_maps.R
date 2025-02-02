@@ -124,7 +124,6 @@ terra::writeRaster(sum_cargo_2023, filename="E:/shipless_areas/sum_cargo/sum_car
 terra::writeRaster(cargo_summed, filename="E:/shipless_areas/sum_cargo/cargo_summed.tif")
 
 #Load
-#sum_cargo_2011 <- terra::rast("E:/shipless_areas/sum_cargo/sum_cargo_2011.tif")
 sum_cargo_2012 <- terra::rast("E:/shipless_areas/sum_cargo/sum_cargo_2012.tif")
 sum_cargo_2013 <- terra::rast("E:/shipless_areas/sum_cargo/sum_cargo_2013.tif")
 sum_cargo_2014 <- terra::rast("E:/shipless_areas/sum_cargo/sum_cargo_2014.tif")
@@ -165,7 +164,7 @@ sum_tankers_2020 <- sum(tankers_2020_01, tankers_2020_02, tankers_2020_03, tanke
 sum_tankers_2021 <- sum(tankers_2021_01, tankers_2021_02, tankers_2021_03, tankers_2021_04, tankers_2021_05, tankers_2021_06, tankers_2021_07, tankers_2021_08, tankers_2021_09, tankers_2021_10, tankers_2021_11, tankers_2021_12, na.rm = TRUE)
 sum_tankers_2022 <- sum(tankers_2022_01, tankers_2022_02, tankers_2022_03, tankers_2022_04, tankers_2022_05, tankers_2022_06, tankers_2022_07, tankers_2022_08, tankers_2022_09, tankers_2022_10, tankers_2022_11, tankers_2022_12, na.rm = TRUE)
 sum_tankers_2023 <- sum(tankers_2023_01, tankers_2023_02, tankers_2023_03, tankers_2023_04, tankers_2023_05, tankers_2023_06, tankers_2023_07, tankers_2023_08, tankers_2023_09, tankers_2023_10, tankers_2023_11, tankers_2023_12, na.rm = TRUE)
-tankers_summed <- sum(sum_tankers_2011, sum_tankers_2012, sum_tankers_2013, sum_tankers_2014, sum_tankers_2015, sum_tankers_2016, sum_tankers_2017, sum_tankers_2018, sum_tankers_2019, sum_tankers_2020, sum_tankers_2021, sum_tankers_2022, sum_tankers_2023, na.rm = TRUE)
+tankers_summed <- sum(sum_tankers_2012, sum_tankers_2013, sum_tankers_2014, sum_tankers_2015, sum_tankers_2016, sum_tankers_2017, sum_tankers_2018, sum_tankers_2019, sum_tankers_2020, sum_tankers_2021, sum_tankers_2022, sum_tankers_2023, na.rm = TRUE)
 #plot(tankers_summed)
 
 #Save
@@ -223,7 +222,7 @@ sum_fishing_2020 <- sum(fishing_2020_01, fishing_2020_02, fishing_2020_03, fishi
 sum_fishing_2021 <- sum(fishing_2021_01, fishing_2021_02, fishing_2021_03, fishing_2021_04, fishing_2021_05, fishing_2021_06, fishing_2021_07, fishing_2021_08, fishing_2021_09, fishing_2021_10, fishing_2021_11, fishing_2021_12, na.rm = TRUE)
 sum_fishing_2022 <- sum(fishing_2022_01, fishing_2022_02, fishing_2022_03, fishing_2022_04, fishing_2022_05, fishing_2022_06, fishing_2022_07, fishing_2022_08, fishing_2022_09, fishing_2022_10, fishing_2022_11, fishing_2022_12, na.rm = TRUE)
 sum_fishing_2023 <- sum(fishing_2023_01, fishing_2023_02, fishing_2023_03, fishing_2023_04, fishing_2023_05, fishing_2023_06, fishing_2023_07, fishing_2023_08, fishing_2023_09, fishing_2023_10, fishing_2023_11, fishing_2023_12, na.rm = TRUE)
-fishing_summed <- sum(sum_fishing_2011, sum_fishing_2012, sum_fishing_2013, sum_fishing_2014, sum_fishing_2015, sum_fishing_2016, sum_fishing_2017, sum_fishing_2018, sum_fishing_2019, sum_fishing_2020, sum_fishing_2021, sum_fishing_2022, sum_fishing_2023, na.rm = TRUE)
+fishing_summed <- sum( sum_fishing_2012, sum_fishing_2013, sum_fishing_2014, sum_fishing_2015, sum_fishing_2016, sum_fishing_2017, sum_fishing_2018, sum_fishing_2019, sum_fishing_2020, sum_fishing_2021, sum_fishing_2022, sum_fishing_2023, na.rm = TRUE)
 #plot(fishing_summed)
 
 #Save
@@ -274,7 +273,7 @@ save(mean_sd_tankers_summed_stack, file = "mean_sd_tankers_summed_stack_v2.RData
 save(mean_sd_fishing_summed_stack, file = "mean_sd_fishing_summed_stack_v2.RData")
 
 ########################################################################################
-#                     Month based summary - not really used
+#                     Month-based summary - (not really used!)
 ########################################################################################
 
 

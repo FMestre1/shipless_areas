@@ -5,6 +5,9 @@
 #FMestre
 #30-09-2024
 
+#Clear environment
+rm(list = ls())
+
 #Load packages
 library(data.table)
 library(classInt)
@@ -14,18 +17,15 @@ library(cowplot)
 library(rnaturalearth)
 library(rnaturalearthdata)
 
-#### 3. Get the functions
-source("script8_1_functions_bivariate_maps.R")
-
-#Clear environment
-rm(list = ls())
+# Get the functions
+source("script_8b_functions_bivariate_maps.R")
 
 #Define the working directory
 setwd("~/github/shipless_areas")
 
 #### 1. Load raster data
 #Have to be loaded as rasters of the raster package
-all_summed_resampled <- raster::raster("final_rasters/all_summed_resampled_NA.tif")
+all_summed_resampled <- raster::raster("final_rasters/all_summed_resampled_no_2011_NA.tif")
 cargo_summed_resampled <- raster::raster("final_rasters/cargo_summed_resampled_NA.tif")
 tankers_summed_resampled <- raster::raster("final_rasters/tankers_summed_resampled_NA.tif")
 fishing_summed_resampled <- raster::raster("final_rasters/fishing_summed_resampled_NA.tif")
@@ -49,12 +49,6 @@ col.matrix <- colmat(nbreaks = 3, breakstyle = "quantile",
                      bottomright = "#ffcc80", upperright = "#b30000",
                      bottomleft = "#c3b3d8", upperleft = "#240d5e",
                      saveLeg = FALSE, plotLeg = TRUE)
-
-#[,1]      [,2]      [,3]      [,4]     
-#[1,] "#C3B3D8" "#C3B3D8" "#E1BFAC" "#FFCC80"
-#[2,] "#C3B3D8" "#C3B3D8" "#E1BFAC" "#FFCC80"
-#[3,] "#735F9B" "#735F9B" "#A6626D" "#D96640"
-#[4,] "#240D5E" "#240D5E" "#6B062F" "#B30000"
 
 # create the bivariate raster
 all_ships_vs_cetaceans <- bivariate.map(rasterx = all_summed_resampled, rastery = cetaceans_sr_raster,
@@ -121,7 +115,7 @@ final_plot_cet_ships <- ggdraw() +
 
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("all_ships_cetacean_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("all_ships_cetacean_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_cet_ships
 dev.off()
 
@@ -193,7 +187,7 @@ final_plot_cet_ships_tank <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("tankers_cetacean_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("tankers_cetacean_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_cet_ships_tank
 dev.off()
 
@@ -265,7 +259,7 @@ final_plot_cet_ships_cargo <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("cargo_cetacean_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("cargo_cetacean_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_cet_ships_cargo
 dev.off()
 
@@ -337,7 +331,7 @@ final_plot_cet_ships_fisihing <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("fishing_cetacean_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("fishing_cetacean_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_cet_ships_fisihing
 dev.off()
 
@@ -417,7 +411,7 @@ final_plot_turtles_ships <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("all_ships_turtles_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("all_ships_turtles_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_turtles_ships
 dev.off()
 
@@ -489,7 +483,7 @@ final_plot_turtles_ships_tank <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("tankers_turtles_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("tankers_turtles_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_turtles_ships_tank
 dev.off()
 
@@ -561,7 +555,7 @@ final_plot_turtles_ships_cargo <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("cargo_turtles_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("cargo_turtles_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_turtles_ships_cargo
 dev.off()
 
@@ -633,7 +627,7 @@ final_plot_turtles_ships_fishing <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("fishing_turtles_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("fishing_turtles_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_turtles_ships_fishing
 dev.off()
 
@@ -712,7 +706,7 @@ final_plot_pinniped_ships <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("all_ships_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("all_ships_pinnipeds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_pinniped_ships
 dev.off()
 
@@ -784,7 +778,7 @@ final_plot_pinnipeds_ships_tank <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("tankers_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("tankers_pinnipeds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_pinnipeds_ships_tank
 dev.off()
 
@@ -856,7 +850,7 @@ final_plot_pinnipeds_ships_cargo <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("cargo_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("cargo_pinnipeds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_pinnipeds_ships_cargo
 dev.off()
 
@@ -928,7 +922,7 @@ final_plot_pinnipeds_ships_fishing <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("fishing_pinnipeds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("fishing_pinnipeds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_pinnipeds_ships_fishing
 dev.off()
 
@@ -1013,7 +1007,7 @@ final_plot_seabirds_ships <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("all_ships_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("all_ships_seabirds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_seabirds_ships
 dev.off()
 
@@ -1085,7 +1079,7 @@ final_plot_seabirds_ships_tank <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("tankers_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("tankers_seabirds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_seabirds_ships_tank
 dev.off()
 
@@ -1157,7 +1151,7 @@ final_plot_seabirds_ships_cargo <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("cargo_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("cargo_seabirds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_seabirds_ships_cargo
 dev.off()
 
@@ -1229,7 +1223,7 @@ final_plot_seabirds_ships_fishing <- ggdraw() +
   )
 
 # Show the final plot with a fixed legend and a title that stays visible
-tiff("fishing_seabirds_02DEZ24.tif", width=5000, height=2900, res=300)
+tiff("fishing_seabirds_02FEV25.tif", width=5000, height=2900, res=300)
 final_plot_seabirds_ships_fishing
 dev.off()
 

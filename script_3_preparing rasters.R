@@ -97,11 +97,11 @@ seabirds_sr_raster_resampled_cropped <- crop(seabirds_sr_raster_resampled, ocean
 #plot(seabirds_sr_raster_resampled_cropped)
 
 #Save
-terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled_no_2011.tif")
-terra::writeRaster(last_three_years_21_22_23_resampled, filename = "last_three_years_21_22_23_resampled.tif")
-terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif")
-terra::writeRaster(tankers_summed_resampled, filename = "tankers_summed_resampled.tif")
-terra::writeRaster(fishing_summed_resampled, filename = "fishing_summed_resampled.tif")
+terra::writeRaster(all_summed_resampled, filename = "all_summed_resampled_no_2011.tif", overwrite=TRUE)
+terra::writeRaster(last_three_years_21_22_23_resampled, filename = "last_three_years_21_22_23_resampled.tif", overwrite=TRUE)
+terra::writeRaster(cargo_summed_resampled, filename = "cargo_summed_resampled.tif", overwrite=TRUE)
+terra::writeRaster(tankers_summed_resampled, filename = "tankers_summed_resampled.tif", overwrite=TRUE)
+terra::writeRaster(fishing_summed_resampled, filename = "fishing_summed_resampled.tif", overwrite=TRUE)
 #Load
 all_summed_resampled <- terra::rast("all_summed_resampled_no_2011.tif")
 last_three_years_21_22_23_resampled <- terra::rast("last_three_years_21_22_23_resampled.tif")
@@ -175,14 +175,14 @@ pinnipeds_sr_raster[!is.na(pinnipeds_sr_raster_mask)] <- NA
 seabirds_sr_raster_resampled_cropped_ext[!is.na(seabirds_sr_raster_resampled_cropped_ext_mask)] <- NA
 
 ### SAVE
-terra::writeRaster(all_summed_resampled,"final_rasters/all_summed_resampled_no_2011_NA.tif")
-terra::writeRaster(last_three_years_21_22_23_resampled,"final_rasters/last_three_years_21_22_23_resampled_NA.tif")
-terra::writeRaster(cargo_summed_resampled,"final_rasters/cargo_summed_resampled_NA.tif")
-terra::writeRaster(tankers_summed_resampled,"final_rasters/tankers_summed_resampled_NA.tif")
-terra::writeRaster(fishing_summed_resampled,"final_rasters/fishing_summed_resampled_NA.tif")
+terra::writeRaster(all_summed_resampled,"final_rasters/all_summed_resampled_no_2011_NA.tif", overwrite=TRUE)
+terra::writeRaster(last_three_years_21_22_23_resampled,"final_rasters/last_three_years_21_22_23_resampled_NA.tif", overwrite=TRUE)
+terra::writeRaster(cargo_summed_resampled,"final_rasters/cargo_summed_resampled_NA.tif", overwrite=TRUE)
+terra::writeRaster(tankers_summed_resampled,"final_rasters/tankers_summed_resampled_NA.tif", overwrite=TRUE)
+terra::writeRaster(fishing_summed_resampled,"final_rasters/fishing_summed_resampled_NA.tif", overwrite=TRUE)
 
-terra::writeRaster(cetaceans_sr_raster,"final_rasters/cetaceans_sr_raster_NA.tif")
-terra::writeRaster(testudines_sr_raster,"final_rasters/testudines_sr_raster_NA.tif")
-terra::writeRaster(pinnipeds_sr_raster,"final_rasters/pinnipeds_sr_raster_NA.tif")
-terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext,"final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
+terra::writeRaster(cetaceans_sr_raster,"final_rasters/cetaceans_sr_raster_NA.tif", overwrite=TRUE)
+terra::writeRaster(testudines_sr_raster,"final_rasters/testudines_sr_raster_NA.tif", overwrite=TRUE)
+terra::writeRaster(pinnipeds_sr_raster,"final_rasters/pinnipeds_sr_raster_NA.tif", overwrite=TRUE)
+terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext,"final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif", overwrite=TRUE)
 

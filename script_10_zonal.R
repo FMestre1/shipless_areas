@@ -16,8 +16,8 @@ rm(list = ls())
 setwd("~/github/shipless_areas")
 
 #Load density rasters (terciles)
-terciles_reclassified_all_summed_2 <- terra::rast("terciles_reclassified_all_summed.tif")
-terciles_reclassified_all_summed_2[is.na(terciles_reclassified_all_summed_2)] <- 0
+terciles_reclassified_all_summed <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02FEV25.tif")
+terciles_reclassified_all_summed[is.na(terciles_reclassified_all_summed)] <- 0
 
 #Vectors of the areas
 mpa <- terra::vect("shapes/mpa_simplified.shp")
@@ -30,23 +30,23 @@ meow <- terra::vect("shapes/meow_ecos.shp")
 coastline <- terra::vect("shapes/coastline.shp")
 
 # Aonal statistics
-counted_values_MBR <- terra::zonal(terciles_reclassified_all_summed_2, 
+counted_values_MBR <- terra::zonal(terciles_reclassified_all_summed, 
                                    marine_realms, fun = "mean",
                                    as.raster = TRUE)
 
-counted_values_MPA <- terra::zonal(terciles_reclassified_all_summed_2, 
+counted_values_MPA <- terra::zonal(terciles_reclassified_all_summed, 
                                    mpa, fun = "mean",
                                    as.raster = TRUE)
 
-counted_values_EBSA <- terra::zonal(terciles_reclassified_all_summed_2, 
+counted_values_EBSA <- terra::zonal(terciles_reclassified_all_summed, 
                                     ebsa, fun = "mean",
                                    as.raster = TRUE)
 
-counted_values_EEZ <- terra::zonal(terciles_reclassified_all_summed_2, 
+counted_values_EEZ <- terra::zonal(terciles_reclassified_all_summed, 
                                     eez, fun = "mean",
                                     as.raster = TRUE)
 
-counted_values_MEOW <- terra::zonal(terciles_reclassified_all_summed_2, 
+counted_values_MEOW <- terra::zonal(terciles_reclassified_all_summed, 
                                     meow, fun = "mean",
                                    as.raster = TRUE)
 

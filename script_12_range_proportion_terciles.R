@@ -31,7 +31,7 @@ range_rasters <- gsub(".tif", "", range_rasters)
 range_rasters <- gsub(" ", "_", range_rasters)
 
 #2. Get the ship density tercile map
-terciles_reclassified_all_summed <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02DEZ24.tif")
+terciles_reclassified_all_summed <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02FEV25.tif")
 
 #2.1. Resample the ship density map to match the range map resolution (or get it from other source)
 terciles_reclassified_all_summed_resampled <- resample(terciles_reclassified_all_summed, terra::rast(range_rasters_paths[[1]]), method="mode")
@@ -147,7 +147,6 @@ box_cetaceans <- ggplot(cetaceans_tercile_percentage, aes(x = percentage, y = as
   theme(legend.position = "none") +
   scale_fill_manual(values = my_palette) +
   xlim(0, 100)
-
 
 # Combine four boxplots in one figure
 #grid.arrange(box_seaturtles, box_seabirds, box_pinnipeds, box_cetaceans, ncol = 2)
