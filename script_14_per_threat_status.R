@@ -158,6 +158,9 @@ seabirds <- read_excel("C:\\Users\\mestr\\Documents\\0. Artigos\\4. SUBMETIDOS\\
 
 all_species <- rbind(cetaceans, sea_turtles, pinnipeds, seabirds)
 
+#Save
+write.csv(all_species, "all_species.csv", row.names = FALSE)
+
 #upload pma_data_frame
 pma_data_frame <- read.csv("pma_overlap_species.csv")
 
