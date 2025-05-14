@@ -455,7 +455,6 @@ bb <- sf::st_union(sf::st_make_grid(sf::st_bbox(c(xmin = -180, xmax = 180, ymax 
 shipless_areas <- terra::rast("~/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
 mpa <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/mpa.shp")
 eez <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/eez_aggregated.shp")
-#Flanders Marine Institute (2021). Global Oceans and Seas, version 1. Available online at https://www.marineregions.org/. https://doi.org/10.14284/542
 open_sea <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/goas_fm.shp")
 
 #Project
@@ -476,8 +475,7 @@ graticule <- sf::st_graticule(lat = seq(-90, 90, by = 30),
 
 fig1 <- ggplot() +
   geom_sf(data = graticule, 
-    color = "grey70", 
-    linetype = "dashed") +
+    color = "grey70") +
   geom_spatvector(
     data = open_sea_proj, 
     fill = NA, 
@@ -487,7 +485,7 @@ fig1 <- ggplot() +
  geom_spatraster(data = shipless_areas_proj) +
  scale_fill_gradient(
     low = "transparent",
-    high = "#98F5FF",
+    high = "#00CDCD",
     na.value = "transparent",
     limits = c(1, 1),
     guide = "none"
@@ -516,8 +514,10 @@ geom_spatvector(
   theme(panel.background = element_blank()) +
   geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
 
+fig1
+
 #Save
-ggsave("fig1.tif", fig1, width = 12, height = 10, dpi = 300)
+ggsave("fig1.svg", fig1, width = 12, height = 10, dpi = 300)
 
 ################################################################################
 # Figure 2
