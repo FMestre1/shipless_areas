@@ -1,5 +1,5 @@
 ################################################################################
-#                       Bivariate Choropleth Maps
+#                                Bivariate Maps
 ################################################################################
 
 #FMestre
@@ -18,7 +18,7 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 
 # Get the functions
-source("script_8b_functions_bivariate_maps.R")
+source("functions_bivariate_maps.R")
 
 #Define the working directory
 setwd("~/github/shipless_areas")
