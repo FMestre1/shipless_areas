@@ -15,8 +15,8 @@ library(terra)
 rm(list = ls())
 
 #Load rasters
-priority_global <- terra::rast("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gis/last_files_fernando/priority_global_20250129.tif")
-shipless_areas <- terra::rast("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
+priority_global <- terra::rast("outputs_fernando_ships_13_maio_25/priority_global_20250129.tif")
+shipless_areas <- terra::rast("PMA_PPA_shipless_areas/shipless_global_20250129_RECLASS_FM.tif")
 #plot(priority_global)
 #plot(shipless_Areas)
 
