@@ -11,6 +11,7 @@ library(gridExtra)
 library(dplyr)
 library(tidyterra)
 library(ggrepel)
+library(ggprism)
 
 ################################################################################
 #                     Convert bivariate maps to raster files
@@ -445,7 +446,78 @@ dev.off()
 # Figure 1
 ################################################################################
 
-#rm(list=ls())
+rm(list=ls())
+
+coastline <- terra::vect("shapes/continents_close_seas.shp")
+
+bb <- sf::st_union(sf::st_make_grid(sf::st_bbox(c(xmin = -180, xmax = 180, ymax = 90, ymin = -90), crs = sf::st_crs(4326)), n = 100))
+
+shipless_areas <- terra::rast("~/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
+mpa <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/mpa.shp")
+eez <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/eez_aggregated.shp")
+#Flanders Marine Institute (2021). Global Oceans and Seas, version 1. Available online at https://www.marineregions.org/. https://doi.org/10.14284/542
+open_sea <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/goas_fm.shp")
+
+#Project
+target_crs <- "+proj=robin +over"
+#
+shipless_areas_proj <- project(shipless_areas, target_crs, method = "near")
+#
+coast_proj <- terra::project(coastline, target_crs)
+mpa_proj <- terra::project(mpa, target_crs)
+eez_proj <- terra::project(eez, target_crs)
+open_sea_proj <- terra::project(open_sea, target_crs)
+#
+bb <- sf::st_transform(bb, target_crs)
+#
+graticule <- sf::st_graticule(lat = seq(-90, 90, by = 30),
+                              lon = seq(-180, 180, by = 60)) |> 
+  sf::st_transform(crs = target_crs)
+
+fig1 <- ggplot() +
+  geom_sf(data = graticule, 
+    color = "grey70", 
+    linetype = "dashed") +
+  geom_spatvector(
+    data = open_sea_proj, 
+    fill = NA, 
+    color = "black", 
+    linewidth = 0.3
+  ) +
+ geom_spatraster(data = shipless_areas_proj) +
+ scale_fill_gradient(
+    low = "transparent",
+    high = "#98F5FF",
+    na.value = "transparent",
+    limits = c(1, 1),
+    guide = "none"
+  ) +
+geom_spatvector(
+    data = mpa_proj,
+    alpha = 0.7,
+    fill = "lightgreen", 
+    color = "lightgreen", 
+    linewidth = 0.5
+  ) +
+  geom_spatvector(
+    data = eez_proj, 
+    fill = NA, 
+    color = "black", 
+    linewidth = 0.5,
+    linetype = "dotted"
+  ) +
+  geom_spatvector(
+    data = coast_proj, 
+    fill = "lightgrey", 
+    color = "black", 
+    linewidth = 0.5
+  ) +
+  theme_void() +
+  theme(panel.background = element_blank()) +
+  geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
+
+#Save
+ggsave("fig1.tif", fig1, width = 12, height = 10, dpi = 300)
 
 ################################################################################
 # Figure 2
@@ -455,10 +527,12 @@ rm(list=ls())
 
 coastline <- terra::vect("shapes/continents_close_seas.shp")
 
-biodiv_terciles <- terra::rast("tercile_rasters/terciles_reclassified_all_biodiv_20JAN25.tif")
-ships_terciles <- terra::rast("tercile_rasters/terciles_reclassified_all_summed_02FEV25.tif")
+biodiv_terciles <- terra::rast("rasters_15maio25/richness_class_20250203.tif")
+ships_terciles <- terra::rast("rasters_15maio25/ship_class_20250203.tif")
 bivariate_total <- terra::rast("final_bivariate/bivariate_global_20250129.tif")
 areas_pma_ppa <- terra::rast("PMA_PPA_shipless_areas/priority_global_20250129.tif")
+
+bb <- sf::st_union(sf::st_make_grid(sf::st_bbox(c(xmin = -180, xmax = 180, ymax = 90, ymin = -90), crs = sf::st_crs(4326)), n = 100))
 
 #Project
 target_crs <- "+proj=robin +over"
@@ -469,6 +543,7 @@ biodiv_terciles_proj <- project(biodiv_terciles, target_crs, method = "near")
 ships_terciles_proj <- project(ships_terciles, target_crs, method = "near")
 bivariate_total_proj <- project(bivariate_total, target_crs, method = "near")
 areas_pma_ppa_proj <- project(areas_pma_ppa, target_crs, method = "near")
+bb <- sf::st_transform(bb, target_crs)
 
 
 #BIODIVERSITY --------------
@@ -478,7 +553,7 @@ biodiv_terciles_proj <- terra::as.factor(biodiv_terciles_proj)
 
 # Optional: set factor labels
 levels(biodiv_terciles_proj) <- data.frame(
-  ID = c(1, 2, 3),
+  ID = c(0, 1, 2),
   levels = c("Low", "Medium", "High")
 )
 
@@ -499,8 +574,8 @@ p1 <- ggplot() +
   ) +
   geom_spatvector(
     data = coast_proj, 
-    fill = "darkgrey", 
-    color = "darkgrey", 
+    fill = "lightgrey", 
+    color = "lightgrey", 
     linewidth = 0.8
   ) +
   labs(title = "Species Richness") +
@@ -508,7 +583,8 @@ p1 <- ggplot() +
   theme(
     legend.position = "bottom",
     plot.title = element_text(hjust = 0.5)  # This centers the title
-  )
+  ) +
+  geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
 
 #SHIPS --------------
 
@@ -517,7 +593,7 @@ ships_terciles_proj <- terra::as.factor(ships_terciles_proj)
 
 # Optional: set factor labels
 levels(ships_terciles_proj) <- data.frame(
-  ID = c(1, 2, 3),
+  ID = c(0, 1, 2),
   levels = c("Low", "Medium", "High")
 )
 
@@ -539,8 +615,8 @@ p2 <- ggplot() +
   ) +
   geom_spatvector(
     data = coast_proj, 
-    fill = "darkgrey", 
-    color = "darkgrey", 
+    fill = "lightgrey", 
+    color = "lightgrey", 
     linewidth = 0.8
   ) +
   labs(title = "Ship Density") +
@@ -548,7 +624,10 @@ p2 <- ggplot() +
   theme(
     legend.position = "bottom",
     plot.title = element_text(hjust = 0.5)  # This centers the title
-  )
+  ) +
+  geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
+
+
 #PPA/PMA --------------
 
 # Convert raster to categorical
@@ -578,8 +657,8 @@ p3 <- ggplot() +
   ) +
   geom_spatvector(
     data = coast_proj, 
-    fill = "darkgrey", 
-    color = "darkgrey", 
+    fill = "lightgrey", 
+    color = "lightgrey", 
     linewidth = 0.8
   ) +
   labs(title = "Priority Areas") +
@@ -587,7 +666,9 @@ p3 <- ggplot() +
   theme(
     legend.position = "bottom",
     plot.title = element_text(hjust = 0.5)  # This centers the title
-  )
+  ) +
+  geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
+
 
 #BIVARIATE --------------
 
@@ -617,8 +698,8 @@ p4 <- ggplot() +
   ) +
   geom_spatvector(
     data = coast_proj, 
-    fill = "darkgrey", 
-    color = "darkgrey", 
+    fill = "lightgrey", 
+    color = "lightgrey", 
     linewidth = 0.8
   ) +
   labs(title = "Species Richness vs Ship Density") +
@@ -626,7 +707,9 @@ p4 <- ggplot() +
   theme(
     legend.position = "none",
     plot.title = element_text(hjust = 0.5)  # This centers the title
-  )
+  ) +
+  geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
+
 
 # Save as high-res PNG (or EPS)
 ggsave("p1.pdf", p1, width = 12, height = 10, dpi = 300)
