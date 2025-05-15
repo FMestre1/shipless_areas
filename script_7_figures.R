@@ -517,7 +517,7 @@ geom_spatvector(
 #fig1
 
 #Save
-ggsave("fig1.tif", fig1, width = 12, height = 6, dpi = 300)
+ggsave("fig1.pdf", fig1, width = 12, height = 6, dpi = 300)
 
 ################################################################################
 # Figure 2
