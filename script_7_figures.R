@@ -455,7 +455,7 @@ bb <- sf::st_union(sf::st_make_grid(sf::st_bbox(c(xmin = -180, xmax = 180, ymax 
 shipless_areas <- terra::rast("~/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
 mpa <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/mpa.shp")
 eez <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/eez_aggregated.shp")
-open_sea <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/goas_fm.shp")
+open_sea <- terra::vect("C:/Users/mestr/Documents/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/open_seas_lines/Equador_et_al_lines.shp")
 
 #Project
 target_crs <- "+proj=robin +over"
@@ -502,7 +502,7 @@ geom_spatvector(
     fill = NA, 
     color = "black", 
     linewidth = 0.5,
-    linetype = "dotted"
+    linetype = "dashed"
   ) +
   geom_spatvector(
     data = coast_proj, 
@@ -514,10 +514,10 @@ geom_spatvector(
   theme(panel.background = element_blank()) +
   geom_sf(data = bb, fill=NA, colour = "#B2B2B2" , linetype='solid', linewidth= 0.75)
 
-fig1
+#fig1
 
 #Save
-ggsave("fig1.svg", fig1, width = 12, height = 10, dpi = 300)
+ggsave("fig1.tif", fig1, width = 12, height = 6, dpi = 300)
 
 ################################################################################
 # Figure 2
