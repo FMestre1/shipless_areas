@@ -12,6 +12,7 @@ library(dplyr)
 library(tidyterra)
 library(ggrepel)
 library(ggprism)
+library(sf)
 
 ################################################################################
 #                     Convert bivariate maps to raster files
@@ -437,7 +438,7 @@ dev.off()
 
 
 
-## SECOND VERSION -------------------------------------------------------------------------------------------------------------------------------------------
+## SECOND VERSION --------------------------------------------------------------
 
 #FAscensão & FMestre
 #13-05-2025
@@ -725,7 +726,7 @@ rm(list=ls())
 
 # MPA ------------------------------------------------
 
-MPA_larger <- st_read("shapes/MPA_Fer_larger.shp")
+MPA_larger <- sf::st_read("shapes/MPA_Fer_larger.shp")
 gc()
 
 bivmap <- rast("bivariate_global_20241203.tif")
