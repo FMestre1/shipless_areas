@@ -29,7 +29,7 @@ meow <- terra::vect("shapes/meow_ecos.shp")
 #Coastline
 coastline <- terra::vect("shapes/coastline.shp")
 
-# Aonal statistics
+# Zonal statistics
 counted_values_MBR <- terra::zonal(terciles_reclassified_all_summed, 
                                    marine_realms, fun = "mean",
                                    as.raster = TRUE)

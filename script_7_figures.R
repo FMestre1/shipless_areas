@@ -13,6 +13,7 @@ library(tidyterra)
 library(ggrepel)
 library(ggprism)
 library(sf)
+library(tidyr)
 
 ################################################################################
 #                     Convert bivariate maps to raster files
@@ -476,22 +477,22 @@ graticule <- sf::st_graticule(lat = seq(-90, 90, by = 30),
 
 fig1 <- ggplot() +
   geom_sf(data = graticule, 
-    color = "grey70") +
+          color = "grey70") +
   geom_spatvector(
     data = open_sea_proj, 
     fill = NA, 
     color = "black", 
     linewidth = 0.3
   ) +
- geom_spatraster(data = shipless_areas_proj) +
- scale_fill_gradient(
+  geom_spatraster(data = shipless_areas_proj) +
+  scale_fill_gradient(
     low = "transparent",
     high = "#00CDCD",
     na.value = "transparent",
     limits = c(1, 1),
     guide = "none"
   ) +
-geom_spatvector(
+  geom_spatvector(
     data = mpa_proj,
     alpha = 0.7,
     fill = "lightgreen", 
@@ -724,231 +725,221 @@ ggsave("p4.pdf", p4, width = 12, height = 10, dpi = 300)
 
 rm(list=ls())
 
-# MPA ------------------------------------------------
+# MPA --------------------------------------------------------------------------
 
-MPA_larger <- sf::st_read("shapes/MPA_Fer_larger.shp")
-gc()
+#Load MPA vector
+mpa <- terra::vect("shapes/WDPA_info.gpkg")
+#mpa <- terra::aggregate(mpa, by="WDPA_ID")
 
-bivmap <- rast("bivariate_global_20241203.tif")
-bivmap.bin <- rast("priority_global_20241203.tif")
+#mpa_data_table <- data.frame(mpa)
+#mpa_agg <- mpa
+#mpa_agg$agg_value <- 1
+#mpa_agg <- terra::aggregate(mpa_agg, by="agg_value")
+#Save/Read
+#writeVector(mpa_agg, "mpa_agg/MPA_aggregated.shp", overwrite =TRUE)
+mpa_agg <- terra::vect("mpa_agg/MPA_aggregated.shp")
 
+#Add area
+mpa_area <- terra::expanse(mpa, "ha")
+mpa$area_hectares <- mpa_area 
+MPA_larger <- mpa[mpa$area_hectares > 100000,]
+MPA_larger <- sf::st_as_sf(MPA_larger)
 
-MPA_info <- exact_extract(bivmap.bin, 
+#Load rasters
+bivmap.bin <- terra::rast("outputs_fernando_ships_13_maio_25\\bivariate_global_20250203.tif")
+priority_global <- terra::rast("outputs_fernando_ships_13_maio_25\\priority_global_20250129.tif")
+
+MPA_info <- exact_extract(raster::raster(priority_global), 
                           MPA_larger, 
                           coverage_area = TRUE,
                           function(df) {df %>%
                               mutate(frac_total = coverage_area / sum(coverage_area)) %>%
-                              group_by(WDPAID, value) %>%
+                              group_by(WDPA_ID, value) %>%
                               summarize(#total_area = sum(coverage_area)/10000,
                                 freq = sum(frac_total))}, 
                           summarize_df = TRUE, 
-                          include_cols = 'WDPAID', 
+                          include_cols = 'WDPA_ID', 
                           progress = FALSE)
 
-(MPA_info2 <- MPA_info %>%
-    dplyr::rename(Priority_area = value) %>%
-    mutate(Priority_area = recode(Priority_area, 
-                                  "1" = "PPA", 
-                                  "2" = "PMA"))) 
+MPA_info2 <- MPA_info %>%
+  dplyr::rename(Priority_area = value) %>%
+  mutate(Priority_area = recode(Priority_area, 
+                                "1" = "PPA", 
+                                "2" = "PMA"))
 
-(MPA_info2b <- MPA_info2 %>% 
-    drop_na() %>%
-    distinct(WDPAID, Priority_area, .keep_all = TRUE) %>%
-    arrange(WDPAID) %>%
-    group_by(WDPAID, Priority_area) %>%
-    summarise(freq = sum(freq)) %>% 
-    arrange(WDPAID) %>%
-    spread(key=Priority_area, value=freq, fill = 0))
-
+MPA_info2b <- MPA_info2 %>% 
+  drop_na() %>%
+  distinct(WDPA_ID, Priority_area, .keep_all = TRUE) %>%
+  arrange(WDPA_ID) %>%
+  group_by(WDPA_ID, Priority_area) %>%
+  summarise(freq = sum(freq)) %>% 
+  arrange(WDPA_ID) %>%
+  spread(key=Priority_area, value=freq, fill = 0)
 
 MPA_larger2 <- MPA_larger %>%
   st_drop_geometry() %>%
-  dplyr::select(WDPAID, NAME, AreaFer_ha,IUCN_CAT) %>%
+  dplyr::select(WDPA_ID, WDPA_Name, area_hectares, WDPA_IUCN_cat) %>%
   distinct() %>%  
-  left_join(MPA_info2b) %>%
-  mutate(IUCN_CAT = recode(IUCN_CAT, 
-                           "Not Assigned" = "Other", 
-                           "Not Applicable" = "Other", 
-                           "Not Reported" = "Other", 
-                           "III" = "Other",  
-                           "IV" = "Other", 
-                           "V" = "Other", 
-                           "VI" = "Other"))
+  left_join(MPA_info2b)
 
 highlights <- MPA_larger2 %>%
-    as_tibble() %>%
-    filter((AreaFer_ha > 5e7 & PMA>.5) | (AreaFer_ha > 10e7 & PPA > 0.5)) %>%
-    arrange(PMA) %>%
-    mutate(label=letters[1:nrow(.)])
+  as_tibble() %>%
+  filter(area_hectares > 30000000  & (PMA > 0.01 & PPA > 0.02) | (PMA > 0.3 & PPA > 0.3)) %>%
+  arrange(PMA) %>%
+  mutate(label=letters[1:nrow(.)])
 
+# EEZ --------------------------------------------------------------------------
 
-# EEZ ------------------------------------------------
-
-eez <- st_read("shapes/eez_zonal.shp")
+eez <- terra::vect("shapes/eez_aggregated.shp")
+eez_area <- terra::expanse(eez, "ha")
+eez$area_hectares <- eez_area 
+eez <- sf::st_as_sf(eez)
 eez <- eez %>% st_make_valid()
 
-EEZ_info <- exact_extract(bivmap.bin, 
+EEZ_info <- exact_extract(raster::raster(priority_global), 
                           eez, 
                           coverage_area = TRUE,
                           function(df) {df %>%
                               mutate(frac_total = coverage_area / sum(coverage_area)) %>%
                               group_by(MRGID, value) %>%
-                              summarize(#total_area = sum(coverage_area)/10000,
+                              summarize(
                                 freq = sum(frac_total))}, 
                           summarize_df = TRUE, 
-                          include_cols = c('MRGID', "AREA_KM2"), 
+                          include_cols = c('MRGID', "area_hectares"), 
                           progress = FALSE)
 
-# 1 --> PPA
-# 2 --> PMA
+EEZ_info2 <- EEZ_info %>%
+  dplyr::rename(Priority_area = value) %>%
+  mutate(Priority_area = recode(Priority_area, 
+                                "1" = "PPA", 
+                                "2" = "PMA")) 
 
-(EEZ_info2 <- EEZ_info %>%
-    dplyr::rename(Priority_area = value) %>%
-    mutate(Priority_area = recode(Priority_area, 
-                                  "1" = "PPA", 
-                                  "2" = "PMA"))) 
+EEZ_info2b <- EEZ_info2 %>% 
+  drop_na() %>%
+  distinct(MRGID, Priority_area, .keep_all = TRUE) %>%
+  group_by(MRGID, Priority_area) %>%
+  summarise(freq = sum(freq)) %>% 
+  spread(key=Priority_area, value=freq, fill = 0)
 
-(EEZ_info2b <- EEZ_info2 %>% 
-    drop_na() %>%
-    distinct(MRGID, Priority_area, .keep_all = TRUE) %>%
-    group_by(MRGID, Priority_area) %>%
-    summarise(freq = sum(freq)) %>% 
-    spread(key=Priority_area, value=freq, fill = 0))
+EEZ2 <- eez %>%
+  st_drop_geometry() %>%
+  dplyr::select(GEONAME, SOVEREIGN1 ,MRGID, area_hectares) %>%
+  distinct() %>%  
+  left_join(EEZ_info2b)%>%
+  drop_na() %>%
+  as_tibble()
 
-
-
-(EEZ2 <- eez %>%
-    st_drop_geometry() %>%
-    dplyr::select(GEONAME, SOVEREIGN1 ,MRGID, AREA_KM2) %>%
-    mutate(AreaFer_ha = as.numeric(AREA_KM2*100)) %>%
-    distinct() %>%  
-    left_join(EEZ_info2b)%>%
-    drop_na() %>%
-    as_tibble()) 
-
-range(EEZ2$AreaFer_ha)
+range(EEZ2$area_hectares)
 
 highlights2 <- EEZ2 %>%
-    as_tibble() %>%
-    filter((AreaFer_ha > 1e8 & PMA>.8) | (AreaFer_ha > 1e8 & PPA > 0.43)) %>%
-    arrange(PMA) %>%
-    mutate(label=letters[(nrow(highlights)+1):(nrow(highlights)+nrow(.))])
+  as_tibble() %>%
+  filter((PMA > 0.05 & PPA > 0.1)) %>%
+  arrange(PMA) %>%
+  mutate(label=letters[(nrow(highlights)+1):(nrow(highlights)+nrow(.))])
 
+# OS ---------------------------------------------------------------------------
 
-# OS -------------------------------------------------
+os <- terra::vect("shapes/Intersect_EEZ_IHO_v5_20241010_Fer.shp")
+os_area <- terra::expanse(os, "ha")
+os$area_hectares <- os_area 
+os <- sf::st_as_sf(os)
+os <- st_make_valid(os)
 
-os <- st_read("shapes/Intersect_EEZ_IHO_v5_20241010_Fer.shp")
-
-os <- os %>%
-  st_make_valid() 
-
-OS_info <- exact_extract(bivmap.bin, 
+OS_info <- exact_extract(raster::raster(priority_global), 
                          os, 
                          coverage_area = TRUE,
                          function(df) {df %>%
                              mutate(frac_total = coverage_area / sum(coverage_area)) %>%
-                             group_by(MRGID,MarRegion, AREA_KM2, value) %>%
-                             summarize(#total_area = sum(coverage_area)/10000,
+                             group_by(MRGID,MarRegion, area_hectares, value) %>%
+                             summarize(
                                freq = sum(frac_total))}, 
                          summarize_df = TRUE, 
-                         include_cols = c('MRGID', "MarRegion", "AREA_KM2"), 
+                         include_cols = c('MRGID', "MarRegion", "area_hectares"), 
                          progress = FALSE)
 
-# 1 --> PPA
-# 2 --> PMA
+OS_info2 <- OS_info %>%
+  dplyr::rename(Priority_area = value) %>%
+  mutate(Priority_area = recode(Priority_area, 
+                                "1" = "PPA", 
+                                "2" = "PMA"))
 
-
-(OS_info2 <- OS_info %>%
-    dplyr::rename(Priority_area = value) %>%
-    mutate(Priority_area = recode(Priority_area, 
-                                  "1" = "PPA", 
-                                  "2" = "PMA"))) 
-
-(OS_info2b <- OS_info2 %>% 
-    drop_na() %>%
-    distinct(MRGID, Priority_area, .keep_all = TRUE) %>%
-    group_by(MRGID, Priority_area) %>%
-    summarise(freq = sum(freq)) %>% 
-    spread(key=Priority_area, value=freq, fill = 0))
+OS_info2b <- OS_info2 %>% 
+  drop_na() %>%
+  distinct(MRGID, Priority_area, .keep_all = TRUE) %>%
+  group_by(MRGID, Priority_area) %>%
+  summarise(freq = sum(freq)) %>% 
+  spread(key=Priority_area, value=freq, fill = 0)
 
 
 
-(OS_info2 <- OS_info %>%
-    st_drop_geometry() %>%
-    dplyr::select(MRGID, AREA_KM2) %>%
-    mutate(AreaFer_ha = as.numeric(AREA_KM2*100)) %>%
-    distinct() %>%  
-    left_join(OS_info2b)%>%
-    drop_na() %>%
-    as_tibble()) 
+OS_info2 <- OS_info %>%
+  st_drop_geometry() %>%
+  dplyr::select(MRGID, area_hectares) %>%
+  distinct() %>%  
+  left_join(OS_info2b)%>%
+  drop_na() %>%
+  as_tibble()
 
 OS_info2$label <- gsub("High Seas of the ", "", OS_info2$MarRegion)
 OS_info2$label <- gsub(" Ocean", "", OS_info2$label)
 
+# Plots ------------------------------------------------------------------------
 
-# Plots -------------------------------------------------
-
-MPA_larger2 <- read.csv("MPA_larger_shipless.csv")
-EEZ2 <- read.csv("EEZ_shipless.csv")
-OS_info2 <- read.csv("OS_shipless.csv")
+#MPA_larger2 <- read.csv("MPA_larger_shipless.csv")
+#EEZ2 <- read.csv("EEZ_shipless.csv")
+#OS_info2 <- read.csv("OS_shipless.csv")
 
 mpa <- ggplot(MPA_larger2, aes(PMA*100, PPA*100)) +
-   # geom_point(aes(size=AreaFer_ha, col=IUCN_CAT), alpha=.5) +
-   geom_jitter(aes(size=AreaFer_ha), col="darkgreen", alpha=.5) +
-   # scale_color_brewer("IUCN cat", palette = "Set1") +
-   geom_label_repel(data = highlights, aes(label=label),
-                     box.padding = .8, max.overlaps = Inf) +
-   scale_x_continuous(breaks = c(25, 50, 75)) +
-   scale_y_continuous(breaks = c(25, 50, 75)) +
-   # labs(x="Area priority for mitigation (%)", y="Area priority\nfor preservation (%)",
-   #      title = "A) MPAs") +
-   labs(x=" ", y="Priority Preservation Areas (%)",
-        title = "A) MPAs") +
-   theme_minimal() +
-   theme(legend.position = "none",
-         text=element_text(size=14)) +
-   guides(size="none")
+  geom_jitter(aes(size=area_hectares), col="darkgreen", alpha=.5) +
+  geom_label_repel(data = highlights, aes(label=label),
+                   box.padding = .8, max.overlaps = Inf) +
+  scale_x_continuous(breaks = c(25, 50, 75)) +
+  scale_y_continuous(breaks = c(25, 50, 75)) +
+  labs(x=" ", y="Priority Preservation Areas (%)",
+       title = "A) MPAs") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        text=element_text(size=14)) +
+  guides(size="none")
+
 
 ###
 
 EEZ <- ggplot(EEZ2, aes(PMA*100, PPA*100)) +
-   geom_jitter(aes(size=AreaFer_ha), col="#FF9326", alpha=.5) +
-   labs(x="PMA (%)", y="PPA (%)") +
-   scale_x_continuous(breaks = c(25, 50, 75)) +
-   scale_y_continuous(breaks = c(25, 50, 75)) +
-   labs(x="Priority Mitigation Areas (%)", y=" ", 
-        title = "B) EEZ") +
-   geom_label_repel(data = highlights2, aes(label=label),
-                    box.padding = .8, max.overlaps = Inf) +
-   theme_minimal() +
-   theme(legend.position = "none",
-         text=element_text(size=14)) +
-   guides(size="none")
+  geom_jitter(aes(size=area_hectares), col="#FF9326", alpha=.5) +
+  labs(x="PMA (%)", y="PPA (%)") +
+  scale_x_continuous(breaks = c(25, 50, 75)) +
+  scale_y_continuous(breaks = c(25, 50, 75)) +
+  labs(x="Priority Mitigation Areas (%)", y=" ", 
+       title = "B) EEZ") +
+  geom_label_repel(data = highlights2, aes(label=label),
+                   box.padding = .8, max.overlaps = Inf) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        text=element_text(size=14)) +
+  guides(size="none")
 
 ###
 
 OS <- ggplot(OS_info2, aes(PMA*100, PPA*100, label=label)) +
-    geom_point(size=3,col="blue", alpha=.5) +
-    labs(x=" ", y=" ", 
-         title = "C) High seas") +
-    geom_label_repel(max.overlaps = Inf, box.padding = 2) +
-    theme_minimal() +
-    # xlim(-5,30) +
-    # ylim(-5,30) +
-    theme(legend.position = "none",
-          text=element_text(size=14)) +
-    guides(size="none")
+  geom_point(size=3,col="blue", alpha=.5) +
+  labs(x=" ", y=" ", 
+       title = "C) High seas") +
+  geom_label_repel(max.overlaps = Inf, box.padding = 2) +
+  theme_minimal() +
+  # xlim(-5,30) +
+  # ylim(-5,30) +
+  theme(legend.position = "none",
+        text=element_text(size=14)) +
+  guides(size="none")
 
 
 # Join All -------------------------------------------------
 
 grid.arrange(mpa, EEZ, OS, nrow=1)
 
-ggsave("fig3.pdf", grid.arrange(mpa, EEZ, OS, nrow=1), width = 18, height = 8, dpi = 300)
-
-#ggsave(plot=grid.arrange(mpa, EEZ, OS, nrow=1), "MPA_EEZ_HS_20250513.tiff",
-#       device=grDevices::tiff,
-#       width = 18, height = 8, units= "cm", dpi = 300)
+ggsave("NEW_fig3.pdf", grid.arrange(mpa, EEZ, OS, nrow=1), width = 18, height = 6, dpi = 300)
+ggsave("NEW_fig3.tiff", grid.arrange(mpa, EEZ, OS, nrow=1), width = 18, height = 6, dpi = 300)
 
 save(mpa$data, EEZ$data, OS_$data, file = "figure3_plots.Rdata")
 
@@ -956,7 +947,6 @@ save(mpa$data, EEZ$data, OS_$data, file = "figure3_plots.Rdata")
 write.csv(MPA_larger2, "MPA_larger2.csv", row.names = F)
 write.csv(EEZ2, "EEZ2.csv", row.names = F)
 write.csv(OS_info2, "OS_info2.csv", row.names = F)
-
 
 ################################################################################
 #               Annual temporal trend of shipless areas (Fig S1)
