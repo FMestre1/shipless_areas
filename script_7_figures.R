@@ -692,7 +692,7 @@ EEZ2 <- eez %>%
   drop_na() %>%
   as_tibble()
 
-range(EEZ2$area_hectares)
+#range(EEZ2$area_hectares)
 
 highlights2 <- EEZ2 %>%
   as_tibble() %>%
