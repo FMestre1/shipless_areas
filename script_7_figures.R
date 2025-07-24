@@ -2,31 +2,10 @@
 #                                   Figures            
 ################################################################################
 
-#load packages
-library(ggplot2)
-library(terra)
-library(exactextractr)
-library(ggrepel)
-library(gridExtra)
-library(dplyr)
-library(tidyterra)
-library(ggrepel)
-library(ggprism)
-library(sf)
-library(tidyr)
-
-################################################################################
-#                     Convert bivariate maps to raster files
-################################################################################
-
 #FMestre
 #25-10-2024
 
-#Clear environment
-rm(list = ls())
-
-#Define the working directory
-setwd("~/github/shipless_areas")
+source("config.R")
 
 ################################################################################
 #                                   Cetaceans
@@ -249,56 +228,11 @@ tankers_vs_seabirds_RASTER <- terra::rasterize(tankers_vs_seabirds_vect,
 terra::writeRaster(tankers_vs_seabirds_RASTER, filename = "final_bivariate/tankers_vs_seabirds_BIVARIATE_02FEV25.tif")
 
 ################################################################################
-#                                 Overall Map
-################################################################################
-
-#library(terra)
-
-#all_ships_vs_cetaceans_RASTER <- terra::rast("final_bivariate/all_ships_vs_cetaceans_BIVARIATE_02FEV25.tif")
-#all_ships_vs_turtles_RASTER <- terra::rast("final_bivariate/all_ships_vs_turtles_BIVARIATE_02FEV25.tif")
-#all_ships_vs_pinnipeds_RASTER <- terra::rast("final_bivariate/all_ships_vs_pinnipeds_BIVARIATE_02FEV25.tif")
-#all_ships_vs_seabirds_RASTER <- terra::rast("final_bivariate/all_ships_vs_seabirds_BIVARIATE_02FEV25.tif")
-
-#Define NA as zero
-##all_ships_vs_cetaceans_RASTER[is.na(all_ships_vs_cetaceans_RASTER[])] <- 0 
-##all_ships_vs_turtles_RASTER[is.na(all_ships_vs_turtles_RASTER[])] <- 0 
-##all_ships_vs_pinnipeds_RASTER[is.na(all_ships_vs_pinnipeds_RASTER[])] <- 0 
-##all_ships_vs_seabirds_RASTER[is.na(all_ships_vs_seabirds_RASTER[])] <- 0 
-
-#plot(all_ships_vs_cetaceans_RASTER)
-#plot(all_ships_vs_turtles_RASTER)
-#plot(all_ships_vs_pinnipeds_RASTER)
-#plot(all_ships_vs_seabirds_RASTER)
-
-#all_hotspots <- all_ships_vs_cetaceans_RASTER +
-#                all_ships_vs_turtles_RASTER +
-#                all_ships_vs_pinnipeds_RASTER +
-#                all_ships_vs_seabirds_RASTER
-
-#plot(all_hotspots)
-#terra::writeRaster(all_hotspots, filename = "all_hotspots_RASTER_02FEV25.tif")
-
-#Make plot
-#world <- rnaturalearth::ne_coastline(scale = "medium", returnclass = "sf")
-#world <- terra::vect(world)
-
-#plot(all_hotspots)
-#plot(world, add=TRUE)
-
-#tiff("all_hotspots.tif", width=5000, height=2900, res=300)
-#plot(all_hotspots, col = c("#E1BFAC" ,"#A6626D", "#6B062F"))
-#dev.off()
-
-
-################################################################################
 #                             MAP OF OVERALL RISKS
 ################################################################################
 
 #FMestre
 #29-11-2024
-
-#Load package
-library(terra)
 
 #Load species richness maps
 cetaceans_sr_raster <- terra::rast("final_rasters/cetaceans_sr_raster_NA.tif")
@@ -343,137 +277,31 @@ terra::writeRaster(overall_conflict_standardized, "overall_conflict_standardized
 #overall_conflict_standardized  <- terra::rast("overall_conflict_standardized2_02FEV25.tif")
 
 ################################################################################
-#                         FOUR AXIS PLOT (not used)
-################################################################################
-
-#FMestre
-#29-11-2024
-
-#Load package
-library(terra)
-library(exactextractr)
-library(ggplot2)
-
-#Create table with percentage of area occupied by high ship density and 
-#percentage of area with high biodiversity value
-
-#Load species richness maps
-cetaceans_sr_raster <- terra::rast("final_rasters/cetaceans_sr_raster_NA.tif")
-testudines_sr_raster <- terra::rast("final_rasters/testudines_sr_raster_NA.tif")
-pinnipeds_sr_raster <- terra::rast("final_rasters/pinnipeds_sr_raster_NA.tif")
-seabirds_sr_raster_resampled_cropped_ext <- terra::rast("final_rasters/seabirds_sr_raster_resampled_cropped_ext_NA.tif")
-
-#Convert NA to 0
-#cetaceans_sr_raster[is.na(cetaceans_sr_raster[])] <- 0 
-#testudines_sr_raster[is.na(testudines_sr_raster[])] <- 0 
-#pinnipeds_sr_raster[is.na(pinnipeds_sr_raster[])] <- 0 
-#seabirds_sr_raster_resampled_cropped_ext[is.na(seabirds_sr_raster_resampled_cropped_ext[])] <- 0 
-biodiv <- cetaceans_sr_raster + testudines_sr_raster + pinnipeds_sr_raster + seabirds_sr_raster_resampled_cropped_ext
-
-all_summed_resampled_NA <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
-
-#Reclassify biodiversity and ships with quartiles
-#Isolate >75%
-
-quartiles_ships <- quantile(values(all_summed_resampled_NA), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
-quartiles_biodiversity <- quantile(values(biodiv), probs = c(1/4, 2/4,3/4), na.rm = TRUE)
-
-class_matrix_all_ships <- matrix(c(0, quartiles_ships[1], 1,  # First quartile
-                                   quartiles_ships[1], quartiles_ships[2], 2,  # Second quartile
-                                   quartiles_ships[2], quartiles_ships[3], 3,  # Third quartile
-                                   quartiles_ships[3], as.numeric(global(all_summed_resampled_NA, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
-                                 ncol = 3, byrow = TRUE)
-
-
-class_matrix_bidiversity <- matrix(c(-1, quartiles_biodiversity[1], 1,  # First quartile
-                                     quartiles_biodiversity[1], quartiles_biodiversity[2], 2,  # Second quartile
-                                     quartiles_biodiversity[2], quartiles_biodiversity[3], 3,  # Third quartile
-                                     quartiles_biodiversity[3], as.numeric(global(biodiv, fun=max, na.rm=TRUE)), 4),  # Fourth quartile
-                                   ncol = 3, byrow = TRUE)
-
-
-quartiles_reclassified_ships <- terra::classify(all_summed_resampled_NA, class_matrix_all_ships)
-quartiles_reclassified_biodiversity <- terra::classify(biodiv, class_matrix_bidiversity)
-
-terra::writeRaster(quartiles_reclassified_ships, "quartiles_reclassified_ships_02FEV25.tif")
-terra::writeRaster(quartiles_reclassified_biodiversity, "quartiles_reclassified_biodiversity_02FEV25.tif")
-
-#Extract per EEZ
-eez <- terra::vect("eez.shp")
-eez_grouped <- aggregate(eez, by = "SOVEREIGN1")
-eez_grouped_sf <- sf::st_as_sf(eez_grouped)
-
-fraction_ships <- exactextractr::exact_extract(quartiles_reclassified_ships, eez_grouped_sf, "frac", progress = TRUE)
-fraction_biodiv <- exactextractr::exact_extract(quartiles_reclassified_biodiversity, eez_grouped_sf, "frac", progress = TRUE)
-
-names(fraction_ships) <- paste0("ships_", names(fraction_ships))
-names(fraction_biodiv) <- paste0("biodiv_", names(fraction_biodiv))
-
-eez_grouped_df <- data.frame(eez_grouped)
-data_for_plot <- data.frame(eez_grouped_df[,c(1,30)], fraction_biodiv, fraction_ships)
-data_for_plot2 <- data.frame(data_for_plot[,1:2],data_for_plot[,-c(1,2)]*100)
-names(data_for_plot2)[1] <- "country"
-names(data_for_plot2)[2] <- "iso_code"
-#View(data_for_plot2)
-
-#Removing "Azerbaijan", "Kazakhstan", "Turkmenistan"
-data_for_plot3 <- data_for_plot2[-c(7, 72, 146),]
-View(data_for_plot3)
-
-#Save
-write.csv(data_for_plot3, "data_for_plot_04DEZ.csv")
-#data_for_plot3 <- read.csv("data_for_plot_04DEZ.csv")
-
-#Save plot
-png(file="four_axis_plot4.png", width=1000, height=1000)
-ggplot(data_for_plot3, aes(x = ships_frac_4, y = biodiv_frac_4, label = iso_code)) +
-  xlim(0, 125) +
-  #geom_text(size = 3, color = "darkblue") +
-  geom_text_repel(size = 3, max.overlaps = Inf) +  # Use geom_text_repel for readable text
-  #geom_text_repel(size = 3, max.overlaps = Inf) +
-  geom_hline(yintercept = 50, linetype = "dashed") +
-  geom_vline(xintercept = 50, linetype = "dashed") +
-  labs(x = "Ship Density", y = "Biodiversity") +
-  theme_minimal()
-dev.off()
-
-
-
-## SECOND VERSION --------------------------------------------------------------
-
-#FAscensão & FMestre
-#13-05-2025
-
-################################################################################
 # Figure 1
 ################################################################################
 
-rm(list=ls())
+source("config.R")
 
 coastline <- terra::vect("shapes/continents_close_seas.shp")
-
 bb <- sf::st_union(sf::st_make_grid(sf::st_bbox(c(xmin = -180, xmax = 180, ymax = 90, ymin = -90), crs = sf::st_crs(4326)), n = 100))
-
 shipless_areas <- terra::rast("~/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
-mpa <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/mpa.shp")
-eez <- terra::vect("C:/Users/mestr/Documents/github/shipless_areas/shapes/eez_aggregated.shp")
+mpa <- terra::vect("shapes/mpa_big_greater_100000.shp")
+eez <- terra::vect("shapes/eez_v12_aggregated.shp")
 open_sea <- terra::vect("C:/Users/mestr/Documents/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/open_seas_lines/Equador_et_al_lines.shp")
 
 #Project
 target_crs <- "+proj=robin +over"
 #
 shipless_areas_proj <- project(shipless_areas, target_crs, method = "near")
-#
 coast_proj <- terra::project(coastline, target_crs)
 mpa_proj <- terra::project(mpa, target_crs)
 eez_proj <- terra::project(eez, target_crs)
 open_sea_proj <- terra::project(open_sea, target_crs)
-#
 bb <- sf::st_transform(bb, target_crs)
 #
 graticule <- sf::st_graticule(lat = seq(-90, 90, by = 30),
                               lon = seq(-180, 180, by = 60)) |> 
-  sf::st_transform(crs = target_crs)
+sf::st_transform(crs = target_crs)
 
 fig1 <- ggplot() +
   geom_sf(data = graticule, 
@@ -519,13 +347,14 @@ fig1 <- ggplot() +
 #fig1
 
 #Save
-ggsave("fig1.pdf", fig1, width = 12, height = 6, dpi = 300)
+ggsave("NEW_fig1.pdf", fig1, width = 12, height = 6, dpi = 300)
+ggsave("NEW_fig1.tiff", fig1, width = 12, height = 6, dpi = 300)
 
 ################################################################################
 # Figure 2
 ################################################################################
 
-rm(list=ls())
+source("config.R")
 
 coastline <- terra::vect("shapes/continents_close_seas.shp")
 
@@ -723,7 +552,7 @@ ggsave("p4.pdf", p4, width = 12, height = 10, dpi = 300)
 # Figure 3
 ################################################################################
 
-rm(list=ls())
+source("config.R")
 
 # MPA --------------------------------------------------------------------------
 
@@ -748,43 +577,77 @@ MPA_larger <- sf::st_as_sf(MPA_larger)
 #Load rasters
 bivmap.bin <- terra::rast("outputs_fernando_ships_13_maio_25\\bivariate_global_20250203.tif")
 priority_global <- terra::rast("outputs_fernando_ships_13_maio_25\\priority_global_20250129.tif")
+shipless_areas <- terra::rast("~/0. Artigos/4. SUBMETIDOS/shipless_areas/gis/last_files_fernando/shipless_global_20250129_RECLASS_FM.tif")
 
-MPA_info <- exact_extract(raster::raster(priority_global), 
-                          MPA_larger, 
-                          coverage_area = TRUE,
-                          function(df) {df %>%
-                              mutate(frac_total = coverage_area / sum(coverage_area)) %>%
-                              group_by(WDPA_ID, value) %>%
-                              summarize(#total_area = sum(coverage_area)/10000,
-                                freq = sum(frac_total))}, 
-                          summarize_df = TRUE, 
-                          include_cols = 'WDPA_ID', 
-                          progress = FALSE)
+###---
 
+MPA_shipless <- exact_extract(
+  raster::raster(shipless_areas),
+  MPA_larger,
+  fun = function(df) {
+    total_area <- sum(df$coverage_fraction, na.rm = TRUE)
+    shipless_area <- sum(df$coverage_fraction[df$value == 1], na.rm = TRUE)
+    fraction <- ifelse(total_area > 0, shipless_area / total_area, NA)
+    data.frame(fraction_shipless = fraction)
+  },
+  include_cols = c("WDPA_ID", "WDPA_Name"),
+  summarize_df = TRUE,
+  progress = FALSE
+)
+
+MPA_larger_df <- data.frame(MPA_larger)
+MPA_larger_df <- MPA_larger_df[,c("WDPA_ID", "WDPA_Name")]
+MPA_shipless <- data.frame(MPA_larger_df, MPA_shipless)
+
+write.csv(MPA_shipless, "MPA_shipless.csv")
+
+###---
+
+# Extract values and compute fractional coverage
+MPA_info <- exact_extract(
+  raster::raster(priority_global), 
+  MPA_larger, 
+  coverage_area = TRUE,
+  fun = function(df) {
+    df %>%
+      mutate(frac_total = coverage_area / sum(coverage_area)) %>%
+      group_by(WDPA_ID, value) %>%
+      summarize(freq = sum(frac_total), .groups = "drop")
+  }, 
+  summarize_df = TRUE, 
+  include_cols = "WDPA_ID", 
+  progress = FALSE
+)
+
+# Recode value to descriptive labels
 MPA_info2 <- MPA_info %>%
-  dplyr::rename(Priority_area = value) %>%
-  mutate(Priority_area = recode(Priority_area, 
-                                "1" = "PPA", 
-                                "2" = "PMA"))
+  rename(Priority_area = value) %>%
+  mutate(Priority_area = recode(Priority_area, "1" = "PPA", "2" = "PMA"))
 
+# Pivot to wide format: one column for each priority area
 MPA_info2b <- MPA_info2 %>% 
   drop_na() %>%
   distinct(WDPA_ID, Priority_area, .keep_all = TRUE) %>%
   arrange(WDPA_ID) %>%
   group_by(WDPA_ID, Priority_area) %>%
-  summarise(freq = sum(freq)) %>% 
-  arrange(WDPA_ID) %>%
-  spread(key=Priority_area, value=freq, fill = 0)
+  summarise(freq = sum(freq), .groups = "drop") %>% 
+  pivot_wider(names_from = Priority_area, values_from = freq, values_fill = 0)
 
+# Merge with original MPA attributes and replace NAs with 0
 MPA_larger2 <- MPA_larger %>%
   st_drop_geometry() %>%
-  dplyr::select(WDPA_ID, WDPA_Name, area_hectares, WDPA_IUCN_cat) %>%
+  select(WDPA_ID, WDPA_Name, area_hectares, WDPA_IUCN_cat) %>%
   distinct() %>%  
-  left_join(MPA_info2b)
-
+  left_join(MPA_info2b, by = "WDPA_ID") %>%
+  mutate(
+    PPA = replace_na(PPA, 0),
+    PMA = replace_na(PMA, 0),
+    PPA_percent = 100 * PPA,
+    PMA_percent = 100 * PMA
+  )
 highlights <- MPA_larger2 %>%
   as_tibble() %>%
-  filter(area_hectares > 30000000  & (PMA > 0.01 & PPA > 0.02) | (PMA > 0.3 & PPA > 0.3)) %>%
+  filter(area_hectares > 40000000  & (PMA > 0.01 & PPA > 0.02) | (PMA > 0.3 & PPA > 0.3) | area_hectares > 9351271 & PMA > 0.8)  %>%
   arrange(PMA) %>%
   mutate(label=letters[1:nrow(.)])
 
@@ -883,11 +746,16 @@ OS_info2 <- OS_info %>%
 OS_info2$label <- gsub("High Seas of the ", "", OS_info2$MarRegion)
 OS_info2$label <- gsub(" Ocean", "", OS_info2$label)
 
+write.csv(MPA_larger2, "MPA_larger_areas.csv")
+write.csv(EEZ2, "EEZ_areas.csv")
+write.csv(OS_info2, "OS_areas.csv")
+
+
 # Plots ------------------------------------------------------------------------
 
-#MPA_larger2 <- read.csv("MPA_larger_shipless.csv")
-#EEZ2 <- read.csv("EEZ_shipless.csv")
-#OS_info2 <- read.csv("OS_shipless.csv")
+#MPA_larger2 <- read.csv("MPA_larger_areas.csv")
+#EEZ2 <- read.csv("EEZ_areas.csv")
+#OS_info2 <- read.csv("OS_areas.csv")
 
 mpa <- ggplot(MPA_larger2, aes(PMA*100, PPA*100)) +
   geom_jitter(aes(size=area_hectares), col="darkgreen", alpha=.5) +
@@ -1010,7 +878,7 @@ sum_all_2022_resampled[is.na(sum_all_2022_resampled[])] <- 0
 sum_all_2023_resampled[is.na(sum_all_2023_resampled[])] <- 0 
 
 #Convert under vector to NA
-continents <- terra::vect("C:/Users/mestr/Documents/0. Artigos/shipless_areas/gis/continents_close_seas.shp")
+continents <- terra::vect("shapes/continents_close_seas.shp")
 
 # Create a mask using the vector
 sum_all_2012_resampled_mask <- terra::mask(sum_all_2012_resampled, continents)

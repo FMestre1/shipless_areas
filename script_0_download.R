@@ -5,6 +5,8 @@
 #FMestre
 #16-07-2024
 
+source("config.R")
+
 #The WD to be used
 setwd("/home/fredmestre/shipless_areas2")
 list.files("/home/fredmestre/shipless_areas2")
@@ -32,10 +34,6 @@ getwd()
 
 #Clear environment
 rm(list = ls()) 
-
-#Load packages
-library(terra)
-library(stringr)
 
 #Define the working directory
 setwd("~/github/shipless_areas")

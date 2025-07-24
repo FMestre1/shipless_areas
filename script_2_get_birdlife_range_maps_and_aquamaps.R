@@ -5,12 +5,7 @@
 #FMestre
 #18-01-2025
 
-#Load library
-library(terra)
-library(sf)
-
-#Clear environment
-rm(list = ls())
+source("config.R")
 
 #Define the working directory
 setwd("~/github/shipless_areas")
@@ -50,9 +45,6 @@ for(i in 1:length(seabird_species)){
 
 #FMestre
 #24-09-2024
-
-# Load necessary libraries
-library(terra)
 
 #Clear environment
 rm(list = ls())

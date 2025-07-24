@@ -5,14 +5,10 @@
 #FMestre
 #30-04-2025
 
+source("config.R")
+
 #Define the working directory
 setwd("~/github/shipless_areas")
-
-#Load library
-library(terra)
-
-#Clear environment
-rm(list = ls())
 
 #Upload areas
 priority_global <- terra::rast("C:\\Users\\mestr\\Documents\\0. Artigos\\4. SUBMETIDOS\\shipless_areas\\gis\\last_files_fernando\\priority_global_20250129.tif")

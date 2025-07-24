@@ -5,17 +5,7 @@
 #FMestre
 #30-09-2024
 
-#Clear environment
-rm(list = ls())
-
-#Load packages
-library(data.table)
-library(classInt)
-library(patchwork)
-library(ggplot2)
-library(cowplot)
-library(rnaturalearth)
-library(rnaturalearthdata)
+source("config.R")
 
 # Get the functions
 source("functions_bivariate_maps.R")

@@ -5,12 +5,7 @@
 #FMestre
 #18-09-2024
 
-#Load library
-library(biscale)
-library(terra)
-
-#Clear environment
-rm(list = ls())
+source("config.R")
 
 #Define the working directory
 setwd("~/github/shipless_areas")

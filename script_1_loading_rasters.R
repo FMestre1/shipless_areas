@@ -5,11 +5,7 @@
 #FMestre
 #15-04-2024
 
-#Clear environment
-rm(list = ls()) 
-
-#Load packages
-library(terra)
+source("config.R")
 
 #Define the working directory
 setwd("~/github/shipless_areas")
@@ -919,10 +915,6 @@ fishing_2023_12 = terra::rast("E:/shipless_areas/fishing/2023/grid_float_Fishing
 #Clear environment
 rm(list = ls()) 
 
-#Load package
-library(terra)
-#library(ggplot2)
-
 #Define the working directory
 setwd("~/github/shipless_areas")
 
@@ -1335,10 +1327,6 @@ rm(list = ls())
 #Define the working directory
 setwd("~/github/shipless_areas")
 
-#Load library
-library(biscale)
-library(terra)
-
 #### 1. Load ship density maps
 
 # CCMAR computer
@@ -1517,9 +1505,6 @@ terra::writeRaster(seabirds_sr_raster_resampled_cropped_ext,"final_rasters/seabi
 
 #Clear environment
 rm(list = ls()) 
-
-#Load package
-library(terra)
 
 #Define the working directory
 setwd("~/github/shipless_areas")
