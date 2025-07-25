@@ -6,8 +6,6 @@
 #30-09-2024
 
 source("config.R")
-
-# Get the functions
 source("functions_bivariate_maps.R")
 
 #Define the working directory
