@@ -806,8 +806,8 @@ OS <- ggplot(OS_info2, aes(PMA*100, PPA*100, label=label)) +
 
 grid.arrange(mpa, EEZ, OS, nrow=1)
 
-ggsave("NEW_fig3.pdf", grid.arrange(mpa, EEZ, OS, nrow=1), width = 18, height = 6, dpi = 300)
-ggsave("NEW_fig3.tiff", grid.arrange(mpa, EEZ, OS, nrow=1), width = 18, height = 6, dpi = 300)
+ggsave("NEW_fig3.pdf", grid.arrange(mpa, EEZ, OS, nrow=1), width = 12, height = 4, dpi = 300)
+ggsave("NEW_fig3.tiff", grid.arrange(mpa, EEZ, OS, nrow=1), width = 12, height = 4, dpi = 300)
 
 save(mpa$data, EEZ$data, OS_$data, file = "figure3_plots.Rdata")
 
