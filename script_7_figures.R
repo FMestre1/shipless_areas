@@ -16,7 +16,6 @@ source("config.R")
 #Get a raster to be the template
 all_summed_resampled_NA <- terra::rast("final_rasters/all_summed_resampled_no_2011_NA.tif")
 
-
 #Convert
 all_ships_vs_cetaceans_df <- as.data.frame(all_ships_vs_cetaceans)
 all_ships_vs_cetaceans_df_vect <- terra::vect(all_ships_vs_cetaceans_df, geom = c("x", "y"))
